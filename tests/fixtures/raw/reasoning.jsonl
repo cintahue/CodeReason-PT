@@ -1,0 +1,7 @@
+{"source":"fixture","source_id":"add-two","reasoning":"Parse the two integers from standard input and print their arithmetic sum."}
+{"source":"fixture","source_id":"factorial","reasoning":"The factorial can be computed directly for the provided integer and printed as a decimal integer."}
+{"source":"fixture","source_id":"reverse-string","reasoning":"Remove only the trailing newline from the input line, reverse the remaining characters, and print the result."}
+{"source":"fixture","source_id":"max-pair-product","reasoning":"The maximum product comes either from the two largest values or from the two most negative values."}
+{"source":"fixture","source_id":"count-vowels","reasoning":"Scan every character and count membership in the lowercase vowel set."}
+{"source":"fixture","source_id":"fibonacci","reasoning":"Iteratively maintain consecutive Fibonacci values until the requested index is reached."}
+

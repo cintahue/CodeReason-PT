@@ -1,0 +1,6 @@
+name: codereason-pt-phase0
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+

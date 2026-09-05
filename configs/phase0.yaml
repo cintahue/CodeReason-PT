@@ -1,0 +1,41 @@
+{
+  "project": {
+    "name": "CodeReason-PT",
+    "phase": "phase0"
+  },
+  "paths": {
+    "artifact_root": "/mnt/data/liangjunwei/CodeReason-PT/phase0",
+    "raw_dir": "/mnt/data/liangjunwei/CodeReason-PT/raw",
+    "raw_sources_dir": "/mnt/data/liangjunwei/CodeReason-PT/raw_sources"
+  },
+  "raw_build": {
+    "hf_endpoint": "https://hf-mirror.com",
+    "target_records": 8000,
+    "candidate_multiplier": 4,
+    "max_opencode_records": 2000000,
+    "datasets": ["taco", "apps"],
+    "opencode_split": "python",
+    "min_pass_rate": 1.0,
+    "required_judgement": "right",
+    "skip_interactive": true
+  },
+  "split": {
+    "seed": 20260904,
+    "target_counts": {
+      "sft": 6500,
+      "pt": 1000,
+      "dev": 500
+    },
+    "ratios": {
+      "sft": 0.6,
+      "pt": 0.3,
+      "dev": 0.1
+    },
+    "min_total_tests": 10,
+    "reward_ratio": 0.7
+  },
+  "dedup": {
+    "ngram_size": 5,
+    "near_duplicate_threshold": 0.8
+  }
+}
