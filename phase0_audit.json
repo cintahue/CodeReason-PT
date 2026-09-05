@@ -1,0 +1,199 @@
+{
+  "candidate_stop_reason": "dataset_exhausted",
+  "config_hash": "336e9e3cdd63bb8b34352ac77b3891b5d23dd7226afc1aea304618ffc415c3ee",
+  "dataset_hashes": {
+    "dev_sha256": "1018bbe6c29c72d0154c9d88ae7b6b637eea61a2d3b381e19a0801f09bd87e80",
+    "processed_problems_sha256": "bd425ecda74e99c30ef6913492c8c1b02b969bd47b73408cee231370909712b4",
+    "pt_sha256": "65838a35916c5d10742fc3df610f27c72751e0dfde64a0c9dbb68691b0c44714",
+    "raw_problems_sha256": "5f4c32829983c632064122c9bff450f669bce2c48c245bd528556e314470aba8",
+    "raw_reasoning_sha256": "5b5f423de69cd2b821311f4e3a1aff3b521ec97f0a19a20f6269438f525677a3",
+    "sft_sha256": "e8c5b3760835ce3489ce574dc0392478e6439a574fdb612de016cf440092b550"
+  },
+  "drop_reasons": {
+    "assembly_skip_counts": {
+      "duplicate_problem": 0,
+      "invalid_output": 37,
+      "missing_source_problem": 1468,
+      "source_split_mismatch": 0
+    },
+    "candidate_skip_counts": {
+      "bad_index": 0,
+      "bad_judgement": 154241,
+      "dataset_not_selected": 356781,
+      "duplicate_problem": 409181,
+      "low_pass_rate": 469371,
+      "missing_reasoning": 0,
+      "missing_source_split": 0
+    },
+    "prepare": {
+      "dropped_short_tests_by_reason_bucket": {
+        "dev:below_min_total_tests:unique_tests=1:min=10": 23,
+        "dev:below_min_total_tests:unique_tests=2:min=10": 30,
+        "dev:below_min_total_tests:unique_tests=3:min=10": 41,
+        "dev:below_min_total_tests:unique_tests=4:min=10": 21,
+        "dev:below_min_total_tests:unique_tests=5:min=10": 15,
+        "dev:below_min_total_tests:unique_tests=6:min=10": 9,
+        "dev:below_min_total_tests:unique_tests=7:min=10": 18,
+        "dev:below_min_total_tests:unique_tests=8:min=10": 5,
+        "dev:below_min_total_tests:unique_tests=9:min=10": 12,
+        "pt:below_min_total_tests:unique_tests=1:min=10": 72,
+        "pt:below_min_total_tests:unique_tests=2:min=10": 89,
+        "pt:below_min_total_tests:unique_tests=3:min=10": 103,
+        "pt:below_min_total_tests:unique_tests=4:min=10": 58,
+        "pt:below_min_total_tests:unique_tests=5:min=10": 47,
+        "pt:below_min_total_tests:unique_tests=6:min=10": 42,
+        "pt:below_min_total_tests:unique_tests=7:min=10": 49,
+        "pt:below_min_total_tests:unique_tests=8:min=10": 45,
+        "pt:below_min_total_tests:unique_tests=9:min=10": 29,
+        "sft:below_min_total_tests:unique_tests=1:min=2": 152
+      },
+      "dropped_short_tests_by_split": {
+        "dev": 174,
+        "pt": 534,
+        "sft": 152
+      },
+      "dropped_short_tests_count": 860
+    }
+  },
+  "gate": {
+    "data_loadable": true,
+    "dev_training_near_duplicate_report_generated": true,
+    "pt_dev_exact_id_overlap": 0,
+    "pt_dev_exact_text_overlap": 0,
+    "pt_dev_near_duplicate_overlap": 0,
+    "reward_heldout_manifest_content_mismatch_count": 0,
+    "reward_heldout_manifest_problem_id_mismatch_count": 0,
+    "reward_heldout_split_fixed": true,
+    "schema_validation": "passed",
+    "sft_dev_exact_id_overlap": 0,
+    "sft_dev_exact_text_overlap": 0,
+    "sft_dev_near_duplicate_overlap": 0,
+    "sft_pt_exact_id_overlap": 0,
+    "sft_pt_exact_text_overlap": 0,
+    "sft_pt_near_duplicate_overlap": 0,
+    "sft_pt_near_duplicate_report_generated": true
+  },
+  "generated_at_utc": "2026-09-05T11:17:43.681495+00:00",
+  "git": {
+    "commit": "05f466f783207ec0e0b5ca8bd092be15f6b7c577",
+    "dirty": true,
+    "status_short": [
+      "M README.md",
+      " M configs/phase0.yaml",
+      " M configs/phase0_environment.yml",
+      " M data/build_raw.py",
+      " M data/deduplicate.py",
+      " M data/prepare.py",
+      " M data/schemas.py",
+      " M data/validate.py",
+      " M scripts/00_prepare_data.sh",
+      " M tests/test_phase0.py",
+      "?? data/audit.py",
+      "?? phase0_audit.json"
+    ]
+  },
+  "overlap_counts": {
+    "blocked_dev_count": 25,
+    "blocked_pt_count": 41,
+    "dev_blocking": {
+      "pt_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 8
+      },
+      "sft_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 1,
+        "near_duplicate_count": 17
+      }
+    },
+    "initial": {
+      "pt_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 8
+      },
+      "sft_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 1,
+        "near_duplicate_count": 17
+      },
+      "sft_pt": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 41
+      }
+    },
+    "post": {
+      "pt_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 0
+      },
+      "sft_dev": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 0
+      },
+      "sft_pt": {
+        "exact_id_overlap_count": 0,
+        "exact_text_overlap_count": 0,
+        "near_duplicate_count": 0
+      }
+    }
+  },
+  "package_versions": {
+    "datasets": "5.0.1",
+    "huggingface-hub": "1.30.0",
+    "pandas": "3.0.5",
+    "pyarrow": "25.0.1",
+    "pyyaml": "6.0.3"
+  },
+  "phase": "phase0",
+  "phase0_status": "passed",
+  "prepare_status": "prepared",
+  "raw_build_status": "built",
+  "record_counts": {
+    "dev": 510,
+    "processed_total": 6161,
+    "pt": 1551,
+    "raw_problems": 7087,
+    "raw_reasoning": 7087,
+    "sft": 4100
+  },
+  "scanned_full_available_opencode_stream": true,
+  "source_split_distribution": {
+    "processed_all": {
+      "apps/test": 2506,
+      "apps/train": 168,
+      "taco/test": 324,
+      "taco/train": 3163
+    },
+    "processed_by_split": {
+      "dev": {
+        "apps/test": 200,
+        "apps/train": 7,
+        "taco/test": 33,
+        "taco/train": 270
+      },
+      "pt": {
+        "apps/test": 608,
+        "apps/train": 32,
+        "taco/test": 93,
+        "taco/train": 818
+      },
+      "sft": {
+        "apps/test": 1698,
+        "apps/train": 129,
+        "taco/test": 198,
+        "taco/train": 2075
+      }
+    },
+    "raw_output": {
+      "apps/test": 2843,
+      "apps/train": 344,
+      "taco/test": 334,
+      "taco/train": 3566
+    }
+  }
+}

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
 from data.config import ensure_phase0_dirs, load_config, resolve_phase0_paths
-from data.deduplicate import detect_sft_pt_overlaps
+from data.deduplicate import detect_cross_split_overlaps
 from data.join_reasoning import join_problem_and_reasoning
 from data.logging_utils import setup_logging
 from data.schemas import iter_jsonl, stable_hash, validate_problem, write_jsonl
@@ -84,6 +85,81 @@ def _write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _min_total_tests_by_split(split_config: dict[str, Any]) -> dict[str, int]:
+    split_names = ("sft", "pt", "dev")
+    if "min_total_tests_by_split" in split_config:
+        configured = split_config["min_total_tests_by_split"]
+        if set(configured) != set(split_names):
+            raise ValueError(f"split.min_total_tests_by_split must contain exactly {split_names}")
+        return {name: int(configured[name]) for name in split_names}
+    legacy_min_total_tests = int(split_config["min_total_tests"])
+    return {name: legacy_min_total_tests for name in split_names}
+
+
+def _cross_split_report(
+    attached: dict[str, list[dict[str, Any]]],
+    *,
+    left_name: str,
+    right_name: str,
+    ngram_size: int,
+    near_duplicate_threshold: float,
+) -> dict[str, Any]:
+    return detect_cross_split_overlaps(
+        attached[left_name],
+        attached[right_name],
+        left_name=left_name,
+        right_name=right_name,
+        ngram_size=ngram_size,
+        near_duplicate_threshold=near_duplicate_threshold,
+    )
+
+
+def _all_overlap_reports(
+    attached: dict[str, list[dict[str, Any]]],
+    *,
+    ngram_size: int,
+    near_duplicate_threshold: float,
+) -> dict[str, dict[str, Any]]:
+    return {
+        "sft_pt": _cross_split_report(
+            attached,
+            left_name="sft",
+            right_name="pt",
+            ngram_size=ngram_size,
+            near_duplicate_threshold=near_duplicate_threshold,
+        ),
+        "sft_dev": _cross_split_report(
+            attached,
+            left_name="sft",
+            right_name="dev",
+            ngram_size=ngram_size,
+            near_duplicate_threshold=near_duplicate_threshold,
+        ),
+        "pt_dev": _cross_split_report(
+            attached,
+            left_name="pt",
+            right_name="dev",
+            ngram_size=ngram_size,
+            near_duplicate_threshold=near_duplicate_threshold,
+        ),
+    }
+
+
+def _drop_reason_counts(dropped_records: list[dict[str, Any]]) -> dict[str, int]:
+    counter = Counter()
+    short_test_pattern = re.compile(r"has (?P<count>\d+) unique tests; min_total_tests=(?P<minimum>\d+)")
+    for item in dropped_records:
+        split = str(item.get("split", "unknown"))
+        reason = str(item.get("reason", "unknown"))
+        match = short_test_pattern.search(reason)
+        if match:
+            key = f"{split}:below_min_total_tests:unique_tests={match.group('count')}:min={match.group('minimum')}"
+        else:
+            key = f"{split}:{reason}"
+        counter[key] += 1
+    return dict(sorted(counter.items()))
+
+
 def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, Any]:
     ensure_phase0_dirs(paths)
     logger = setup_logging(paths["logs_dir"] / "phase0_prepare.log")
@@ -97,7 +173,7 @@ def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, 
 
     split_config = config["split"]
     split_seed = int(split_config["seed"])
-    min_total_tests = int(split_config["min_total_tests"])
+    min_total_tests_by_split = _min_total_tests_by_split(split_config)
     reward_ratio = float(split_config["reward_ratio"])
     raw_splits = _split_records(
         join_result.records,
@@ -120,28 +196,49 @@ def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, 
                     split=split_name,
                     seed=split_seed,
                     reward_ratio=reward_ratio,
-                    min_total_tests=min_total_tests,
+                    min_total_tests=min_total_tests_by_split[split_name],
                 )
             except ValueError as exc:
-                dropped_short_tests.append({"problem_id": record["problem_id"], "reason": str(exc)})
+                dropped_short_tests.append({"problem_id": record["problem_id"], "split": split_name, "reason": str(exc)})
                 continue
             validate_problem(final_record)
             attached[split_name].append(final_record)
 
     dedup_config = config["dedup"]
-    pre_dedup_report = detect_sft_pt_overlaps(
-        attached["sft"],
-        attached["pt"],
-        ngram_size=int(dedup_config["ngram_size"]),
-        near_duplicate_threshold=float(dedup_config["near_duplicate_threshold"]),
+    ngram_size = int(dedup_config["ngram_size"])
+    near_duplicate_threshold = float(dedup_config["near_duplicate_threshold"])
+    initial_overlap_report = _all_overlap_reports(
+        attached,
+        ngram_size=ngram_size,
+        near_duplicate_threshold=near_duplicate_threshold,
     )
-    blocked_pt_ids = set(pre_dedup_report["blocked_pt_problem_ids"])
+    blocked_pt_ids = set(initial_overlap_report["sft_pt"]["blocked_pt_problem_ids"])
     if blocked_pt_ids:
         attached["pt"] = [record for record in attached["pt"] if record["problem_id"] not in blocked_pt_ids]
 
-    post_dedup_report = detect_sft_pt_overlaps(
-        attached["sft"],
-        attached["pt"],
+    dev_blocking_overlap_report = {
+        "sft_dev": _cross_split_report(
+            attached,
+            left_name="sft",
+            right_name="dev",
+            ngram_size=ngram_size,
+            near_duplicate_threshold=near_duplicate_threshold,
+        ),
+        "pt_dev": _cross_split_report(
+            attached,
+            left_name="pt",
+            right_name="dev",
+            ngram_size=ngram_size,
+            near_duplicate_threshold=near_duplicate_threshold,
+        ),
+    }
+    blocked_dev_ids = set(dev_blocking_overlap_report["sft_dev"]["blocked_dev_problem_ids"])
+    blocked_dev_ids.update(dev_blocking_overlap_report["pt_dev"]["blocked_dev_problem_ids"])
+    if blocked_dev_ids:
+        attached["dev"] = [record for record in attached["dev"] if record["problem_id"] not in blocked_dev_ids]
+
+    post_overlap_report = _all_overlap_reports(
+        attached,
         ngram_size=int(dedup_config["ngram_size"]),
         near_duplicate_threshold=float(dedup_config["near_duplicate_threshold"]),
     )
@@ -158,6 +255,16 @@ def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, 
         paths["reports_dir"] / "test_split_manifest.jsonl",
         [test_split_manifest_record(record) for record in all_records],
     )
+    overlap_report = {
+        "initial": initial_overlap_report,
+        "dev_blocking": dev_blocking_overlap_report,
+        "post": post_overlap_report,
+        "blocked_pt_count": len(blocked_pt_ids),
+        "blocked_dev_count": len(blocked_dev_ids),
+        "blocked_pt_problem_ids": sorted(blocked_pt_ids),
+        "blocked_dev_problem_ids": sorted(blocked_dev_ids),
+    }
+    _write_json(paths["reports_dir"] / "phase0_overlap_report.json", overlap_report)
 
     report = {
         "phase": "phase0",
@@ -168,11 +275,16 @@ def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, 
         "split_seed": split_seed,
         "split_ratios": split_config["ratios"],
         "target_counts": split_config.get("target_counts"),
-        "min_total_tests": min_total_tests,
+        "min_total_tests_by_split": min_total_tests_by_split,
         "reward_ratio": reward_ratio,
         "dropped_short_tests": dropped_short_tests,
-        "pre_dedup_sft_pt": pre_dedup_report,
-        "post_dedup_sft_pt": post_dedup_report,
+        "dropped_short_tests_count": len(dropped_short_tests),
+        "drop_reason_counts": _drop_reason_counts(dropped_short_tests),
+        "initial_overlap_report": initial_overlap_report,
+        "dev_blocking_overlap_report": dev_blocking_overlap_report,
+        "post_overlap_report": post_overlap_report,
+        "blocked_pt_count": len(blocked_pt_ids),
+        "blocked_dev_count": len(blocked_dev_ids),
         "final_counts": dict(sorted(split_counts.items())),
         "outputs": {
             "all": str(paths["processed_dir"] / "problems.jsonl"),
@@ -180,6 +292,7 @@ def prepare_phase0(config: dict[str, Any], paths: dict[str, Path]) -> dict[str, 
             "pt": str(paths["processed_dir"] / "pt.jsonl"),
             "dev": str(paths["processed_dir"] / "dev.jsonl"),
             "test_split_manifest": str(paths["reports_dir"] / "test_split_manifest.jsonl"),
+            "overlap_report": str(paths["reports_dir"] / "phase0_overlap_report.json"),
         },
     }
     _write_json(paths["reports_dir"] / "phase0_prepare_report.json", report)

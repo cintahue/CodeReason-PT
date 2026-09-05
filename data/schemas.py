@@ -7,6 +7,7 @@ from typing import Any, Iterable
 
 
 SPLITS = {"sft", "pt", "dev"}
+SOURCE_ID_SEPARATOR = ":"
 
 
 def stable_json(value: Any) -> str:
@@ -21,6 +22,21 @@ def make_problem_id(source: str, source_id: str) -> str:
     if not source or not source_id:
         raise ValueError("source and source_id are required to derive problem_id")
     return f"{source}:{source_id}"
+
+
+def make_source_id(source_split: str, index: int | str) -> str:
+    split = str(source_split).strip().lower()
+    source_index = str(index).strip()
+    if not split or not source_index:
+        raise ValueError("source_split and index are required to derive source_id")
+    return f"{split}{SOURCE_ID_SEPARATOR}{source_index}"
+
+
+def split_source_id(source_id: str) -> tuple[str | None, str]:
+    if SOURCE_ID_SEPARATOR not in source_id:
+        return None, source_id
+    source_split, source_index = source_id.split(SOURCE_ID_SEPARATOR, 1)
+    return source_split or None, source_index
 
 
 def iter_jsonl(path: str | Path) -> Iterable[dict[str, Any]]:
@@ -134,4 +150,3 @@ def validate_problem(record: dict[str, Any]) -> None:
 
 def problem_text_for_dedup(record: dict[str, Any]) -> str:
     return record.get("prompt", "")
-

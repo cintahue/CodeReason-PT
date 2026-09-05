@@ -1,6 +1,12 @@
-name: codereason-pt-phase0
+name: codereason-pt
 channels:
   - conda-forge
 dependencies:
   - python=3.11
-
+  - pandas>=2
+  - pyarrow>=14
+  - pyyaml>=6
+  - pip
+  - pip:
+      - datasets>=2.20
+      - huggingface-hub>=0.24

@@ -31,7 +31,11 @@
       "pt": 0.3,
       "dev": 0.1
     },
-    "min_total_tests": 10,
+    "min_total_tests_by_split": {
+      "sft": 2,
+      "pt": 10,
+      "dev": 10
+    },
     "reward_ratio": 0.7
   },
   "dedup": {
