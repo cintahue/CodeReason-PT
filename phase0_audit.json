@@ -73,24 +73,11 @@
     "sft_pt_near_duplicate_overlap": 0,
     "sft_pt_near_duplicate_report_generated": true
   },
-  "generated_at_utc": "2026-09-05T11:17:43.681495+00:00",
+  "generated_at_utc": "2026-09-05T14:58:59.081604+00:00",
   "git": {
-    "commit": "05f466f783207ec0e0b5ca8bd092be15f6b7c577",
-    "dirty": true,
-    "status_short": [
-      "M README.md",
-      " M configs/phase0.yaml",
-      " M configs/phase0_environment.yml",
-      " M data/build_raw.py",
-      " M data/deduplicate.py",
-      " M data/prepare.py",
-      " M data/schemas.py",
-      " M data/validate.py",
-      " M scripts/00_prepare_data.sh",
-      " M tests/test_phase0.py",
-      "?? data/audit.py",
-      "?? phase0_audit.json"
-    ]
+    "commit": "f8b194962e8e9f48235a3b2cab7b6230f2a137ce",
+    "dirty": false,
+    "status_short": []
   },
   "overlap_counts": {
     "blocked_dev_count": 25,
