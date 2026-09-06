@@ -94,12 +94,28 @@ def diagnose_base_cap_extension(config_path: str) -> dict[str, Any]:
     if missing:
         raise ValueError(f"Capped pilot IDs missing from final Dev view: {missing[:5]}")
 
-    model, tokenizer = _load_model_and_tokenizer(config)
+    output_dir = artifact_root(config) / "length_policy"
+    rollouts_path = output_dir / "base_dev_capped_2048_to_4096_rollouts.jsonl"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    existing_rollouts = load_jsonl(rollouts_path) if rollouts_path.exists() else []
     generation_config = generation_config_for_hash(config)
     generation_config_hash = stable_hash(generation_config)
-    new_rollouts: list[dict[str, Any]] = []
+    completed_by_id: dict[str, dict[str, Any]] = {}
+    for rollout in existing_rollouts:
+        problem_id = str(rollout["problem_id"])
+        if problem_id not in capped_old_by_id:
+            raise ValueError(f"Existing diagnostic rollout is not in capped pilot subset: {problem_id}")
+        if rollout.get("generation_config_hash") != generation_config_hash:
+            raise ValueError(f"Existing diagnostic rollout uses a different generation config: {problem_id}")
+        completed_by_id[problem_id] = rollout
+
+    model, tokenizer = _load_model_and_tokenizer(config)
+    new_rollouts: list[dict[str, Any]] = [completed_by_id[problem_id] for problem_id in capped_ids if problem_id in completed_by_id]
 
     for index, problem_id in enumerate(capped_ids, start=1):
+        if problem_id in completed_by_id:
+            print(f"4096 diagnostic already had {index}/{len(capped_ids)} capped Dev records", flush=True)
+            continue
         record = dev_records[problem_id]
         prompt = serialize_prompt(config, str(record["prompt"]))
         generated = _generate(config, model, tokenizer, prompt)
@@ -140,10 +156,16 @@ def diagnose_base_cap_extension(config_path: str) -> dict[str, Any]:
             "hit_max_new_tokens": generated["hit_max_new_tokens"],
         }
         new_rollouts.append(rollout)
+        with rollouts_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(rollout, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+            handle.write("\n")
         print(f"4096 diagnostic evaluated {index}/{len(capped_ids)} capped Dev records", flush=True)
 
-    output_dir = artifact_root(config) / "length_policy"
-    rollouts_path = output_dir / "base_dev_capped_2048_to_4096_rollouts.jsonl"
+    new_rollouts = [completed_by_id.get(problem_id) for problem_id in capped_ids if problem_id in completed_by_id]
+    if len(new_rollouts) != len(capped_ids):
+        new_rollouts = load_jsonl(rollouts_path)
+    if len(new_rollouts) != len(capped_ids):
+        raise RuntimeError(f"Diagnostic incomplete: expected {len(capped_ids)} rollouts, got {len(new_rollouts)}")
     write_jsonl(rollouts_path, new_rollouts)
 
     remaining_cap_count = sum(1 for item in new_rollouts if int(item["response_token_count"]) == 4096)

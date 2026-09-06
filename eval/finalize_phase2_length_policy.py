@@ -69,7 +69,12 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
         "eval_config_version": config["eval_config_version"],
         "generation_config": generation_config_for_hash(config),
     }
-    status = "completed" if final_eval_max_new_tokens == 4096 and final_sft_max_sequence_length == 8192 else "incomplete"
+    if final_eval_max_new_tokens == 4096 and final_sft_max_sequence_length == 8192:
+        status = "completed_4096_official_baseline"
+    elif cap_report.get("decision") == "stop_no_auto_increase" and sft_policy_confirmed:
+        status = "stopped_no_auto_increase"
+    else:
+        status = "incomplete"
     audit = {
         "phase": "phase2_length_policy",
         "status": status,
@@ -139,7 +144,7 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
         "runtime": runtime_info(),
     }
     write_json("phase2_length_policy_audit.json", audit)
-    if status != "completed":
+    if status == "incomplete":
         raise SystemExit("Phase 2 length policy audit is incomplete; inspect phase2_length_policy_audit.json")
     return audit
 
