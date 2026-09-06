@@ -1,0 +1,212 @@
+{
+  "base_metrics": {
+    "code_extraction_success_rate": 1.0,
+    "executable_rate": 0.6066350710900474,
+    "extraction_strategy_counts": {
+      "direct": 222,
+      "fenced:python": 197,
+      "fenced:untyped": 3
+    },
+    "generation_latency_ms": {
+      "average": 26912.49526066351,
+      "count": 422.0,
+      "max": 105409.0,
+      "p50": 6640.0,
+      "p95": 91084.0
+    },
+    "heldout_test_mean_pass_rate": 0.2219279328438529,
+    "hit_max_new_tokens_count": 101,
+    "mean_testcase_pass_rate": 0.21624100033428573,
+    "pass_at_1": 0.08056872037914692,
+    "response_tokens": {
+      "average": 614.2322274881517,
+      "count": 422.0,
+      "max": 2048.0,
+      "p50": 154.0,
+      "p95": 2048.0
+    },
+    "reward_test_mean_pass_rate": 0.2139261955340013,
+    "status_counts": {
+      "AC": 34,
+      "CE": 71,
+      "RE": 79,
+      "TLE": 16,
+      "WA": 222
+    },
+    "total": 422
+  },
+  "docker_image": "python@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534",
+  "eval_config": {
+    "generation_config": {
+      "do_sample": false,
+      "max_new_tokens": 2048,
+      "num_return_sequences": 1,
+      "use_cache": true
+    },
+    "generation_config_hash": "47131944c5d6e1978a371d3cf1b1c1ee395b3be101cde98c0230cad9d7e21cdc",
+    "hash": "92550817569c81a0373ab572f30d7ed38649775a8c212ff85408c7ea279cb456",
+    "path": "configs/base_eval.yaml",
+    "prompt_serialization_version": "causal_lm_problem_solution_v1"
+  },
+  "final_dev_dataset_hash": "bacd4aa9ea0f0487c0b21ca0da5fc1ac1b1cea67cb53c363bbc8f2591084a0ce",
+  "generated_at_utc": "2026-09-06T15:18:27.638516+00:00",
+  "git": {
+    "commit": "b57beafc443487689c528334163d5e74170e6380",
+    "dirty": false,
+    "status_short": []
+  },
+  "metrics_report": {
+    "hash": "a08aa6401fdb323456c90eed47bed85a138525123d4b68e4f48b0ec99e1be769",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics.json"
+  },
+  "model": {
+    "dtype": "bfloat16",
+    "model_revision": "09d9bc5d376b0cfa0100a0694ea7de7232525803",
+    "repo_id": "Qwen/Qwen2.5-Coder-3B",
+    "tokenizer_revision": "09d9bc5d376b0cfa0100a0694ea7de7232525803"
+  },
+  "phase": "phase2_base_baseline",
+  "phase1_final_eligibility_manifest": "/mnt/data/liangjunwei/CodeReason-PT/phase1/manifests/phase1_final_eligibility_manifest.jsonl",
+  "phase1_final_eligibility_manifest_hash": "7b851acbb2d3989af88b0aeb6492100e2d4da12ecc16ce20a06cffde8ebdd98d",
+  "phase2_gate": {
+    "all_dev_problems_evaluated_successfully": true,
+    "base_metrics_generated": true,
+    "final_dev_identity_verified": true,
+    "model_prompt_eval_config_frozen": true,
+    "result_audit_hashes_recorded": true
+  },
+  "rollouts": {
+    "hash": "385863576dca3bacfd79b6be68ff636bd1cc62de447832ad4042fe671ffcc6d2",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
+  },
+  "runtime": {
+    "gpu": [
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 1,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 2,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 3,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      }
+    ],
+    "package_versions": {
+      "accelerate": "1.14.0",
+      "datasets": "5.0.1",
+      "huggingface_hub": "1.30.0",
+      "pandas": "3.0.5",
+      "pyarrow": "25.0.1",
+      "tokenizers": "0.23.2",
+      "torch": "2.9.1+cu128",
+      "transformers": "5.16.1"
+    },
+    "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "time_utc": "2026-09-06T14:55:05Z"
+  },
+  "token_length_statistics": {
+    "hash": "1a4f282536d3d7b2752840d457fbb89cf7127e88d568ac98717a6310d9b1cf3e",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_token_profile.json",
+    "splits": {
+      "dev": {
+        "count": 422,
+        "ocr_code_tokens": {
+          "count": 422.0,
+          "max": 1376.0,
+          "p50": 173.0,
+          "p95": 673.0,
+          "p99": 1042.0
+        },
+        "prompt_plus_max_new_tokens_over_context_count": 0,
+        "prompt_plus_max_new_tokens_over_context_problem_id_sample": [],
+        "prompt_tokens": {
+          "count": 422.0,
+          "max": 1668.0,
+          "p50": 440.0,
+          "p90": 751.0,
+          "p95": 867.0,
+          "p99": 1338.0
+        },
+        "reasoning_plus_code_tokens": {
+          "count": 422.0,
+          "max": 24041.0,
+          "p50": 6492.0,
+          "p95": 16613.0,
+          "p99": 19646.0
+        },
+        "reasoning_tokens": {
+          "count": 422.0,
+          "max": 23134.0,
+          "p50": 6333.0,
+          "p95": 16080.0,
+          "p99": 19240.0
+        }
+      },
+      "sft": {
+        "count": 3051,
+        "ocr_code_tokens": {
+          "count": 3051.0,
+          "max": 1398.0,
+          "p50": 175.0,
+          "p95": 623.0,
+          "p99": 916.0
+        },
+        "prompt_plus_max_new_tokens_over_context_count": 0,
+        "prompt_plus_max_new_tokens_over_context_problem_id_sample": [],
+        "prompt_tokens": {
+          "count": 3051.0,
+          "max": 2855.0,
+          "p50": 452.0,
+          "p90": 754.0,
+          "p95": 897.0,
+          "p99": 1267.0
+        },
+        "reasoning_plus_code_tokens": {
+          "count": 3051.0,
+          "max": 24867.0,
+          "p50": 6318.0,
+          "p95": 16132.0,
+          "p99": 19935.0
+        },
+        "reasoning_tokens": {
+          "count": 3051.0,
+          "max": 24263.0,
+          "p50": 6114.0,
+          "p95": 15676.0,
+          "p99": 19572.0
+        }
+      }
+    }
+  },
+  "views_report": {
+    "hash": "326e80846071073be22c1fbcde44af86d254aa4e95dd3b5f6b69f83cfa7e134b",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_views_report.json"
+  }
+}
