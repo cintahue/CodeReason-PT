@@ -10,6 +10,7 @@ from typing import Any
 
 from data.schemas import stable_hash
 from eval.phase2_common import (
+    artifact_root,
     config_hash,
     file_sha256,
     generation_config_for_hash,
@@ -219,15 +220,31 @@ def _load_records_for_mode(config: dict[str, Any], mode: str) -> tuple[str, list
 
 
 def _rollout_path(config: dict[str, Any], mode: str) -> Path:
+    configured = _configured_output_path(config, f"{mode}_rollouts")
+    if configured is not None:
+        return configured
     if mode == "smoke":
         return smoke_dir(config) / "base_sft_smoke_rollouts.jsonl"
     return rollouts_dir(config) / "base_dev_rollouts.jsonl"
 
 
 def _report_path(config: dict[str, Any], mode: str) -> Path:
+    configured = _configured_output_path(config, f"{mode}_report")
+    if configured is not None:
+        return configured
     if mode == "smoke":
         return smoke_dir(config) / "base_sft_smoke_report.json"
     return reports_dir(config) / "base_dev_metrics.json"
+
+
+def _configured_output_path(config: dict[str, Any], key: str) -> Path | None:
+    value = config.get("outputs", {}).get(key)
+    if not value:
+        return None
+    path = Path(str(value)).expanduser()
+    if path.is_absolute():
+        return path
+    return artifact_root(config) / path
 
 
 def _summarize_rollouts(rollouts: list[dict[str, Any]]) -> dict[str, Any]:
@@ -284,6 +301,9 @@ def _audit(config_path: str, config: dict[str, Any], report: dict[str, Any], rol
             "tokenizer_revision": config["model"]["tokenizer_revision"],
             "dtype": config["model"]["dtype"],
         },
+        "eval_config_version": config.get("eval_config_version", "causal_lm_eval_v1"),
+        "baseline_role": config.get("baseline_role", "pilot_base_baseline"),
+        "pilot_baseline": config.get("pilot_baseline"),
         "docker_image": config["verifier"]["docker_image"],
         "eval_config": {
             "path": config_path,
@@ -378,6 +398,8 @@ def run_baseline(config_path: str, mode: str) -> dict[str, Any]:
             "tokenizer_revision": config["model"]["tokenizer_revision"],
             "dtype": config["model"]["dtype"],
         },
+        "eval_config_version": config.get("eval_config_version", "causal_lm_eval_v1"),
+        "baseline_role": config.get("baseline_role", "pilot_base_baseline"),
         "prompt": {
             "serialization_version": config["prompt"]["serialization_version"],
             "use_chat_template": config["prompt"]["use_chat_template"],
@@ -395,7 +417,8 @@ def run_baseline(config_path: str, mode: str) -> dict[str, Any]:
     write_json(report_path, report)
     if mode == "dev":
         audit = _audit(config_path, config, report, output_rollouts)
-        write_json("phase2_base_audit.json", audit)
+        audit_path = _configured_output_path(config, "base_audit") or Path("phase2_base_audit.json")
+        write_json(audit_path, audit)
     return report
 
 
