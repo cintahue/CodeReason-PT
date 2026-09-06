@@ -1,0 +1,194 @@
+{
+  "backend_policy": {
+    "docker": "formal_rollout_and_reward_execution",
+    "local": "regression_and_fast_diagnostics_only"
+  },
+  "eligibility_manifest": "/mnt/data/liangjunwei/CodeReason-PT/phase1/manifests/phase1_eligibility_manifest.jsonl",
+  "eligibility_manifest_hash": "48dd12a1274c404a41de3648cb0c81e0ac3092820ec9a8c329ec9c6e93f1ae8d",
+  "eligible_counts": {
+    "dev": 423,
+    "pt": 1265,
+    "sft": 3054
+  },
+  "generated_at_utc": "2026-09-06T04:27:36.029127+00:00",
+  "git": {
+    "commit": "d274d3fb9b049f17b716f93dce2a469c3f1a101f",
+    "dirty": true,
+    "status_short": [
+      " M verifier/executor.py",
+      " M verifier/sandbox.py",
+      " M verifier/validate_reference_solutions.py",
+      "?? phase1_verifier_audit.json",
+      "?? scripts/02_qualify_verifier.sh",
+      "?? tests/test_verifier_qualification.py",
+      "?? verifier/qualify_phase1.py"
+    ]
+  },
+  "local_vs_docker_basic_parity": {
+    "cases": [
+      {
+        "case": "AC",
+        "docker_status": "AC",
+        "local_status": "AC",
+        "matched": true
+      },
+      {
+        "case": "WA",
+        "docker_status": "WA",
+        "local_status": "WA",
+        "matched": true
+      },
+      {
+        "case": "RE",
+        "docker_status": "RE",
+        "local_status": "RE",
+        "matched": true
+      },
+      {
+        "case": "TLE",
+        "docker_status": "TLE",
+        "local_status": "TLE",
+        "matched": true
+      }
+    ],
+    "matched": true,
+    "policy": {
+      "docker_backend": "formal_rollout_and_reward_execution",
+      "local_backend": "regression_and_fast_diagnostics_only"
+    },
+    "status": "completed"
+  },
+  "normalization_policy_hash": "fa2c696863cdad58d031735705e4963a8cd74db720b6f25ea472dc63b6ab76e6",
+  "ocr_solution_acceptance": {
+    "acceptance_rate": 0.7958123681220581,
+    "accepted": 4903,
+    "status_counts": {
+      "AC": 4903,
+      "RE": 131,
+      "TLE": 124,
+      "WA": 1003
+    },
+    "total": 6161
+  },
+  "ocr_solution_failure_categories": {
+    "runtime_error_requires_inspection": 49,
+    "timeout_or_resource_limit": 124,
+    "unsupported_io_format_or_bad_test_input": 82,
+    "wrong_output_source_data_or_judging_mismatch": 1003
+  },
+  "phase": "phase1.1_verifier_qualification",
+  "phase0_dataset_hash": "bd425ecda74e99c30ef6913492c8c1b02b969bd47b73408cee231370909712b4",
+  "protocol_counts": {
+    "stdio": 6161
+  },
+  "qualification_report": "/mnt/data/liangjunwei/CodeReason-PT/phase1/reports/phase1_qualification_report.json",
+  "qualification_report_hash": "e1fc8c03fb219e1a0c87013edc6ea185eb3bf6a6fe09faa9ddb09b9d2a413960",
+  "source_ref1_failure_categories": {
+    "bad_reference_solution_or_extraction": 229,
+    "runtime_error_requires_inspection": 259,
+    "timeout_or_resource_limit": 81,
+    "unsupported_dependency": 32,
+    "unsupported_filesystem_io": 6,
+    "unsupported_io_format_or_bad_test_input": 115,
+    "wrong_output_source_data_or_judging_mismatch": 1013
+  },
+  "source_ref1_re_error_types": {
+    "AttributeError": 93,
+    "EOFError": 21,
+    "FileNotFoundError": 6,
+    "ImportError": 30,
+    "IndexError": 68,
+    "KeyError": 10,
+    "MemoryError": 3,
+    "ModuleNotFoundError": 2,
+    "NameError": 2,
+    "OutputLimitExceeded": 9,
+    "RecursionError": 6,
+    "RuntimeError": 4,
+    "SyntaxError": 1,
+    "TypeError": 28,
+    "ValueError": 47,
+    "ZeroDivisionError": 4,
+    "error": 1,
+    "missing_result": 77
+  },
+  "source_ref1_wa_diagnostics": {
+    "counts": {
+      "exact_normalized_mismatch": 599,
+      "suspected_source_testcase_issue": 62,
+      "unknown": 0,
+      "unsupported_multiple_output_style_problem": 200,
+      "whitespace_tokenization_mismatch": 152
+    },
+    "total_wa": 1013
+  },
+  "source_ref_any3_failure_categories": {
+    "bad_reference_solution_or_extraction": 51,
+    "runtime_error_requires_inspection": 100,
+    "timeout_or_resource_limit": 59,
+    "unsupported_dependency": 10,
+    "unsupported_filesystem_io": 6,
+    "unsupported_io_format_or_bad_test_input": 100,
+    "wrong_output_source_data_or_judging_mismatch": 942
+  },
+  "source_ref_any3_re_error_types": {
+    "AttributeError": 26,
+    "EOFError": 21,
+    "FileNotFoundError": 6,
+    "ImportError": 10,
+    "IndexError": 55,
+    "KeyError": 5,
+    "MemoryError": 1,
+    "NameError": 1,
+    "OutputLimitExceeded": 9,
+    "RecursionError": 4,
+    "RuntimeError": 2,
+    "SyntaxError": 1,
+    "TypeError": 12,
+    "ValueError": 43,
+    "ZeroDivisionError": 2,
+    "error": 1,
+    "missing_result": 17
+  },
+  "source_ref_any3_wa_diagnostics": {
+    "counts": {
+      "exact_normalized_mismatch": 537,
+      "suspected_source_testcase_issue": 68,
+      "unknown": 0,
+      "unsupported_multiple_output_style_problem": 174,
+      "whitespace_tokenization_mismatch": 163
+    },
+    "total_wa": 942
+  },
+  "source_ref_at_1": {
+    "acceptance_rate": 0.7183898717740627,
+    "accepted": 4426,
+    "status_counts": {
+      "AC": 4426,
+      "CE": 229,
+      "RE": 412,
+      "TLE": 81,
+      "WA": 1013
+    },
+    "total": 6161
+  },
+  "source_ref_at_any3": {
+    "acceptance_rate": 0.7941892549910728,
+    "accepted": 4893,
+    "status_counts": {
+      "AC": 4893,
+      "CE": 51,
+      "RE": 216,
+      "TLE": 59,
+      "WA": 942
+    },
+    "total": 6161
+  },
+  "source_tle_10s_diagnostic": {
+    "source_attempt_tle": 183,
+    "source_attempt_tle_to_ac_at_10s": 33,
+    "source_ref1_tle": 81,
+    "source_ref1_tle_to_ac_at_10s": 22
+  },
+  "verifier_code_hash": "413592d48bc256e9bd925be2e376c2047d2fe98134f42dfc8428788139098605"
+}

@@ -389,11 +389,18 @@ def _run_docker(code: str, tests: list[dict[str, Any]], config: SandboxConfig) -
         result_path = root / "result.json"
         harness_path.write_text(HARNESS_SOURCE, encoding="utf-8")
         _write_json(payload_path, _payload(code, tests, config))
+        root.chmod(0o777)
+        harness_path.chmod(0o644)
+        payload_path.chmod(0o644)
         command = [
             "docker",
             "run",
             "--rm",
             "-i",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
             "--network",
             "none",
             "--cpus",

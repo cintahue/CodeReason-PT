@@ -175,22 +175,25 @@ def _run_to_test_result(run: dict[str, Any], expected_output: str) -> TestRunRes
     )
 
 
-def verify_code(
+def verify_code_with_raw_runs(
     code: str,
     tests: list[dict[str, Any]],
     *,
     sandbox_config: SandboxConfig | None = None,
     extraction_strategy: str = "direct",
-) -> VerificationResult:
+) -> tuple[VerificationResult, list[dict[str, Any]]]:
     sandbox_config = sandbox_config or SandboxConfig()
     coerced_tests = _coerce_tests(tests)
     syntax = _syntax_check(code)
     if not syntax.ok:
-        return _result_for_ce(
-            total=len(coerced_tests),
-            extraction_strategy=extraction_strategy,
-            sandbox_config=sandbox_config,
-            syntax=syntax,
+        return (
+            _result_for_ce(
+                total=len(coerced_tests),
+                extraction_strategy=extraction_strategy,
+                sandbox_config=sandbox_config,
+                syntax=syntax,
+            ),
+            [],
         )
 
     sandbox_result = run_python_in_sandbox(code, coerced_tests, sandbox_config)
@@ -201,18 +204,24 @@ def verify_code(
             error_type=sandbox_result["compile_error"].get("error_type"),
             error_message=sandbox_result["compile_error"].get("error_message"),
         )
-        return _result_for_ce(
-            total=len(coerced_tests),
-            extraction_strategy=extraction_strategy,
-            sandbox_config=sandbox_config,
-            syntax=syntax_error,
+        return (
+            _result_for_ce(
+                total=len(coerced_tests),
+                extraction_strategy=extraction_strategy,
+                sandbox_config=sandbox_config,
+                syntax=syntax_error,
+            ),
+            [],
         )
     if sandbox_result.get("protocol_error"):
-        return _result_for_protocol_error(
-            total=len(coerced_tests),
-            extraction_strategy=extraction_strategy,
-            sandbox_config=sandbox_config,
-            sandbox_result=sandbox_result,
+        return (
+            _result_for_protocol_error(
+                total=len(coerced_tests),
+                extraction_strategy=extraction_strategy,
+                sandbox_config=sandbox_config,
+                sandbox_result=sandbox_result,
+            ),
+            [],
         )
 
     test_results: list[TestRunResult] = []
@@ -245,25 +254,44 @@ def verify_code(
     status = _status_from_runs(test_results, passed, total)
     timeout = any(item.timeout for item in test_results)
     runtime_success = not timeout and not any(item.status == VerifierStatus.RE for item in test_results)
-    return VerificationResult(
-        status=status,
-        compile_success=True,
-        runtime_success=runtime_success,
-        timeout=timeout,
-        passed=passed,
-        total=total,
-        pass_rate=(passed / total if total else 0.0),
-        exit_code=next((item.exit_code for item in test_results if item.status != VerifierStatus.AC), 0),
-        runtime_ms=sum(item.runtime_ms for item in test_results),
-        stdout_size=sum(item.stdout_size for item in test_results),
-        stderr_size=sum(item.stderr_size for item in test_results),
-        extraction_strategy=extraction_strategy,
-        sandbox_backend=str(sandbox_result.get("backend") or sandbox_config.backend),
-        normalization_policy=NORMALIZATION_POLICY,
-        sandbox={**sandbox_config.to_dict(), "backend_notes": normalization_notes(sandbox_config)},
-        syntax_error=None,
-        test_results=test_results,
+    return (
+        VerificationResult(
+            status=status,
+            compile_success=True,
+            runtime_success=runtime_success,
+            timeout=timeout,
+            passed=passed,
+            total=total,
+            pass_rate=(passed / total if total else 0.0),
+            exit_code=next((item.exit_code for item in test_results if item.status != VerifierStatus.AC), 0),
+            runtime_ms=sum(item.runtime_ms for item in test_results),
+            stdout_size=sum(item.stdout_size for item in test_results),
+            stderr_size=sum(item.stderr_size for item in test_results),
+            extraction_strategy=extraction_strategy,
+            sandbox_backend=str(sandbox_result.get("backend") or sandbox_config.backend),
+            normalization_policy=NORMALIZATION_POLICY,
+            sandbox={**sandbox_config.to_dict(), "backend_notes": normalization_notes(sandbox_config)},
+            syntax_error=None,
+            test_results=test_results,
+        ),
+        list(runs),
     )
+
+
+def verify_code(
+    code: str,
+    tests: list[dict[str, Any]],
+    *,
+    sandbox_config: SandboxConfig | None = None,
+    extraction_strategy: str = "direct",
+) -> VerificationResult:
+    result, _ = verify_code_with_raw_runs(
+        code,
+        tests,
+        sandbox_config=sandbox_config,
+        extraction_strategy=extraction_strategy,
+    )
+    return result
 
 
 def verify(

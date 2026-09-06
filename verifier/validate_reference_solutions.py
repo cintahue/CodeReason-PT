@@ -62,6 +62,20 @@ def _git_command(args: list[str]) -> str:
     return completed.stdout.strip()
 
 
+def _git_status_short() -> list[str]:
+    try:
+        completed = subprocess.run(
+            ["git", "status", "--short"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return []
+    return completed.stdout.splitlines()
+
+
 def _file_sha256(path: Path) -> str | None:
     if not path.exists():
         return None
@@ -309,7 +323,7 @@ def _build_report(
 
 
 def _build_audit(report: dict[str, Any], *, report_path: Path, sandbox_config: SandboxConfig) -> dict[str, Any]:
-    status_short = _git_command(["status", "--short"])
+    status_short = _git_status_short()
     gate = {
         "regression_tests_required": True,
         "reference_validation_completed": report["status"] == "completed",
@@ -324,7 +338,7 @@ def _build_audit(report: dict[str, Any], *, report_path: Path, sandbox_config: S
         "git": {
             "commit": _git_command(["rev-parse", "HEAD"]),
             "dirty": bool(status_short),
-            "status_short": status_short.splitlines(),
+            "status_short": status_short,
         },
         "verifier_code_hash": _verifier_code_hash(),
         "reference_validation_report": str(report_path),
