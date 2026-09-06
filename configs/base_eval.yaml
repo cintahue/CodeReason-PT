@@ -1,0 +1,73 @@
+phase: phase2_base_baseline
+frozen: true
+
+paths:
+  artifact_root: /mnt/data/liangjunwei/CodeReason-PT/phase2
+  phase0_processed_path: /mnt/data/liangjunwei/CodeReason-PT/phase0/processed/problems.jsonl
+  phase1_final_manifest_path: /mnt/data/liangjunwei/CodeReason-PT/phase1/manifests/phase1_final_eligibility_manifest.jsonl
+  phase1_qualification_report_path: /mnt/data/liangjunwei/CodeReason-PT/phase1/reports/phase1_qualification_report.json
+  phase1_docker_confirmation_report_path: /mnt/data/liangjunwei/CodeReason-PT/phase1/reports/phase1_docker_confirmation_report.json
+
+expected:
+  phase1_final_manifest_hash: 7b851acbb2d3989af88b0aeb6492100e2d4da12ecc16ce20a06cffde8ebdd98d
+  final_counts:
+    sft: 3051
+    pt: 1259
+    dev: 422
+
+views:
+  sft: final_sft.jsonl
+  pt: final_pt.jsonl
+  dev: final_dev.jsonl
+
+model:
+  repo_id: Qwen/Qwen2.5-Coder-3B
+  model_revision: 09d9bc5d376b0cfa0100a0694ea7de7232525803
+  tokenizer_revision: 09d9bc5d376b0cfa0100a0694ea7de7232525803
+  cache_dir: /mnt/data/liangjunwei/CodeReason-PT/hf_cache
+  local_dir: /mnt/data/liangjunwei/CodeReason-PT/models/Qwen2.5-Coder-3B/09d9bc5d376b0cfa0100a0694ea7de7232525803
+  dtype: bfloat16
+  device_map: auto
+  trust_remote_code: false
+  max_position_embeddings: 32768
+
+prompt:
+  serialization_version: causal_lm_problem_solution_v1
+  use_chat_template: false
+  template: "### Problem\n{problem}\n\n### Solution\n"
+
+generation:
+  do_sample: false
+  num_return_sequences: 1
+  max_new_tokens: 2048
+  use_cache: true
+
+token_profile:
+  splits: [sft, dev]
+  fail_if_prompt_plus_generation_exceeds_context: true
+
+smoke:
+  split: sft
+  sample_count: 20
+  sample_seed: 20260906
+  selection: stable_problem_id_hash
+
+eval:
+  split: dev
+  expected_count: 422
+  batch_size: 1
+  deterministic_seed: 20260906
+
+verifier:
+  docker_image: python@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+  backend: docker
+  wall_time_seconds: 2.0
+  cpu_time_seconds: 2
+  memory_mb: 1024
+  process_limit: 64
+  output_limit_bytes: 1000000
+
+heldout_usage_boundary:
+  task_integrity_qualification: source/reference solutions may run reward+heldout tests once for dataset integrity and verifier qualification
+  preference_and_grpo_reward: policy-generated responses may access reward tests only
+  heldout_policy_evaluation: heldout tests are independent diagnosis only and must not feed optimizer or preference construction
