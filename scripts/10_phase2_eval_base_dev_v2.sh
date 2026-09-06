@@ -9,5 +9,6 @@ export HF_HUB_CACHE="${HF_HUB_CACHE:-/mnt/data/liangjunwei/CodeReason-PT/hf_cach
 export TRANSFORMERS_CACHE="${TRANSFORMERS_CACHE:-${HF_HUB_CACHE}}"
 export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-1}"
 export TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-1}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 
 "${PYTHON_BIN}" -m eval.run_base_baseline --config "${CONFIG}" --mode dev
