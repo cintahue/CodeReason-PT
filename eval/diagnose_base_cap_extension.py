@@ -33,6 +33,9 @@ from verifier.extract_code import extract_python_code
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Rerun 2048-capped Phase 2 Dev samples with max_new_tokens=4096.")
     parser.add_argument("--config", default="configs/base_eval_v2.yaml")
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--shard-count", type=int, default=1)
+    parser.add_argument("--combine-only", action="store_true")
     return parser.parse_args()
 
 
@@ -76,98 +79,48 @@ def _generation_cost(old_rollouts: dict[str, dict[str, Any]], new_rollouts: list
     }
 
 
-def diagnose_base_cap_extension(config_path: str) -> dict[str, Any]:
-    config = read_config(config_path)
-    if int(config["generation"]["max_new_tokens"]) != 4096:
-        raise ValueError("This diagnostic requires configs/base_eval_v2.yaml with generation.max_new_tokens=4096")
-    set_deterministic_seed(int(config["eval"]["deterministic_seed"]))
-
-    pilot_rollouts = _load_pilot_rollouts(config)
-    capped = [item for item in pilot_rollouts if int(item["response_token_count"]) == 2048]
-    if len(capped) != 101:
-        raise ValueError(f"Expected 101 pilot capped samples with response_token_count == 2048, got {len(capped)}")
-    capped_ids = [item["problem_id"] for item in capped]
-    capped_old_by_id = {item["problem_id"]: item for item in capped}
-
-    dev_records = {record["problem_id"]: record for record in load_jsonl(view_path(config, "dev"))}
-    missing = [problem_id for problem_id in capped_ids if problem_id not in dev_records]
-    if missing:
-        raise ValueError(f"Capped pilot IDs missing from final Dev view: {missing[:5]}")
-
+def _output_paths(config: dict[str, Any], shard_index: int, shard_count: int) -> tuple[Path, Path, list[Path]]:
     output_dir = artifact_root(config) / "length_policy"
-    rollouts_path = output_dir / "base_dev_capped_2048_to_4096_rollouts.jsonl"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    existing_rollouts = load_jsonl(rollouts_path) if rollouts_path.exists() else []
-    generation_config = generation_config_for_hash(config)
-    generation_config_hash = stable_hash(generation_config)
+    canonical = output_dir / "base_dev_capped_2048_to_4096_rollouts.jsonl"
+    shard_paths = [
+        output_dir / f"base_dev_capped_2048_to_4096_rollouts.shard_{index:02d}_of_{shard_count:02d}.jsonl"
+        for index in range(shard_count)
+    ]
+    write_path = canonical if shard_count == 1 else shard_paths[shard_index]
+    return canonical, write_path, [canonical, *shard_paths]
+
+
+def _load_completed_rollouts(
+    paths: list[Path],
+    capped_old_by_id: dict[str, dict[str, Any]],
+    generation_config_hash: str,
+) -> dict[str, dict[str, Any]]:
     completed_by_id: dict[str, dict[str, Any]] = {}
-    for rollout in existing_rollouts:
-        problem_id = str(rollout["problem_id"])
-        if problem_id not in capped_old_by_id:
-            raise ValueError(f"Existing diagnostic rollout is not in capped pilot subset: {problem_id}")
-        if rollout.get("generation_config_hash") != generation_config_hash:
-            raise ValueError(f"Existing diagnostic rollout uses a different generation config: {problem_id}")
-        completed_by_id[problem_id] = rollout
-
-    model, tokenizer = _load_model_and_tokenizer(config)
-    new_rollouts: list[dict[str, Any]] = [completed_by_id[problem_id] for problem_id in capped_ids if problem_id in completed_by_id]
-
-    for index, problem_id in enumerate(capped_ids, start=1):
-        if problem_id in completed_by_id:
-            print(f"4096 diagnostic already had {index}/{len(capped_ids)} capped Dev records", flush=True)
+    for path in paths:
+        if not path.exists():
             continue
-        record = dev_records[problem_id]
-        prompt = serialize_prompt(config, str(record["prompt"]))
-        generated = _generate(config, model, tokenizer, prompt)
-        extracted = extract_python_code(generated["response"])
-        verifier = _verify_generated_code(config, extracted.code, record)
-        rollout = {
-            "problem_id": problem_id,
-            "diagnostic": "base_dev_2048_capped_to_4096",
-            "old_generation_config_hash": capped_old_by_id[problem_id]["generation_config_hash"],
-            "old_verifier_status": capped_old_by_id[problem_id]["verifier_status"],
-            "old_response_token_count": capped_old_by_id[problem_id]["response_token_count"],
-            "old_generation_latency_ms": capped_old_by_id[problem_id]["generation_latency_ms"],
-            "model_repo": config["model"]["repo_id"],
-            "model_revision": config["model"]["model_revision"],
-            "tokenizer_revision": config["model"]["tokenizer_revision"],
-            "prompt_serialization_version": config["prompt"]["serialization_version"],
-            "generation_config": generation_config,
-            "generation_config_hash": generation_config_hash,
-            "raw_response": generated["response"],
-            "extracted_code": extracted.code,
-            "extraction_strategy": extracted.strategy,
-            "extraction_success": bool(extracted.code.strip()),
-            "verifier_status": verifier["status"],
-            "testcase_passed": verifier["passed"],
-            "testcase_total": verifier["total"],
-            "testcase_pass_rate": verifier["pass_rate"],
-            "reward_status": verifier["reward"]["status"],
-            "reward_passed": verifier["reward"]["passed"],
-            "reward_total": verifier["reward"]["total"],
-            "reward_pass_rate": verifier["reward"]["pass_rate"],
-            "heldout_status": verifier["heldout"]["status"],
-            "heldout_passed": verifier["heldout"]["passed"],
-            "heldout_total": verifier["heldout"]["total"],
-            "heldout_pass_rate": verifier["heldout"]["pass_rate"],
-            "prompt_token_count": generated["prompt_tokens"],
-            "response_token_count": generated["response_tokens"],
-            "generation_latency_ms": generated["generation_latency_ms"],
-            "hit_max_new_tokens": generated["hit_max_new_tokens"],
-        }
-        new_rollouts.append(rollout)
-        with rollouts_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(rollout, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
-            handle.write("\n")
-        print(f"4096 diagnostic evaluated {index}/{len(capped_ids)} capped Dev records", flush=True)
+        for rollout in load_jsonl(path):
+            problem_id = str(rollout["problem_id"])
+            if problem_id not in capped_old_by_id:
+                raise ValueError(f"Existing diagnostic rollout is not in capped pilot subset: {problem_id}")
+            if rollout.get("generation_config_hash") != generation_config_hash:
+                raise ValueError(f"Existing diagnostic rollout uses a different generation config: {problem_id}")
+            previous = completed_by_id.get(problem_id)
+            if previous and previous.get("raw_response") != rollout.get("raw_response"):
+                raise ValueError(f"Conflicting diagnostic rollout for {problem_id}")
+            completed_by_id[problem_id] = rollout
+    return completed_by_id
 
-    new_rollouts = [completed_by_id.get(problem_id) for problem_id in capped_ids if problem_id in completed_by_id]
-    if len(new_rollouts) != len(capped_ids):
-        new_rollouts = load_jsonl(rollouts_path)
-    if len(new_rollouts) != len(capped_ids):
-        raise RuntimeError(f"Diagnostic incomplete: expected {len(capped_ids)} rollouts, got {len(new_rollouts)}")
-    write_jsonl(rollouts_path, new_rollouts)
 
+def _write_final_report(
+    *,
+    config_path: str,
+    config: dict[str, Any],
+    capped: list[dict[str, Any]],
+    capped_old_by_id: dict[str, dict[str, Any]],
+    rollouts_path: Path,
+    new_rollouts: list[dict[str, Any]],
+) -> dict[str, Any]:
     remaining_cap_count = sum(1 for item in new_rollouts if int(item["response_token_count"]) == 4096)
     full_dev_count = int(config["eval"]["expected_count"])
     remaining_cap_threshold = int(full_dev_count * 0.05)
@@ -226,9 +179,164 @@ def diagnose_base_cap_extension(config_path: str) -> dict[str, Any]:
     return report
 
 
+def diagnose_base_cap_extension(
+    config_path: str,
+    *,
+    shard_index: int = 0,
+    shard_count: int = 1,
+    combine_only: bool = False,
+) -> dict[str, Any]:
+    config = read_config(config_path)
+    if int(config["generation"]["max_new_tokens"]) != 4096:
+        raise ValueError("This diagnostic requires configs/base_eval_v2.yaml with generation.max_new_tokens=4096")
+    if shard_count < 1:
+        raise ValueError("shard_count must be >= 1")
+    if shard_index < 0 or shard_index >= shard_count:
+        raise ValueError("shard_index must be in [0, shard_count)")
+    set_deterministic_seed(int(config["eval"]["deterministic_seed"]))
+
+    pilot_rollouts = _load_pilot_rollouts(config)
+    capped = [item for item in pilot_rollouts if int(item["response_token_count"]) == 2048]
+    if len(capped) != 101:
+        raise ValueError(f"Expected 101 pilot capped samples with response_token_count == 2048, got {len(capped)}")
+    capped_ids = [item["problem_id"] for item in capped]
+    capped_old_by_id = {item["problem_id"]: item for item in capped}
+
+    dev_records = {record["problem_id"]: record for record in load_jsonl(view_path(config, "dev"))}
+    missing = [problem_id for problem_id in capped_ids if problem_id not in dev_records]
+    if missing:
+        raise ValueError(f"Capped pilot IDs missing from final Dev view: {missing[:5]}")
+
+    output_dir = artifact_root(config) / "length_policy"
+    rollouts_path, write_path, read_paths = _output_paths(config, shard_index, shard_count)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    generation_config = generation_config_for_hash(config)
+    generation_config_hash = stable_hash(generation_config)
+    completed_by_id = _load_completed_rollouts(read_paths, capped_old_by_id, generation_config_hash)
+
+    if combine_only:
+        new_rollouts = [completed_by_id[problem_id] for problem_id in capped_ids if problem_id in completed_by_id]
+        if len(new_rollouts) != len(capped_ids):
+            raise RuntimeError(f"Diagnostic incomplete: expected {len(capped_ids)} rollouts, got {len(new_rollouts)}")
+        write_jsonl(rollouts_path, new_rollouts)
+        return _write_final_report(
+            config_path=config_path,
+            config=config,
+            capped=capped,
+            capped_old_by_id=capped_old_by_id,
+            rollouts_path=rollouts_path,
+            new_rollouts=new_rollouts,
+        )
+
+    model, tokenizer = _load_model_and_tokenizer(config)
+
+    target_ids = [
+        problem_id
+        for zero_index, problem_id in enumerate(capped_ids)
+        if shard_count == 1 or zero_index % shard_count == shard_index
+    ]
+    for local_index, problem_id in enumerate(target_ids, start=1):
+        if problem_id in completed_by_id:
+            print(f"4096 diagnostic shard {shard_index}/{shard_count} already had {local_index}/{len(target_ids)}", flush=True)
+            continue
+        record = dev_records[problem_id]
+        prompt = serialize_prompt(config, str(record["prompt"]))
+        generated = _generate(config, model, tokenizer, prompt)
+        extracted = extract_python_code(generated["response"])
+        verifier = _verify_generated_code(config, extracted.code, record)
+        rollout = {
+            "problem_id": problem_id,
+            "diagnostic": "base_dev_2048_capped_to_4096",
+            "old_generation_config_hash": capped_old_by_id[problem_id]["generation_config_hash"],
+            "old_verifier_status": capped_old_by_id[problem_id]["verifier_status"],
+            "old_response_token_count": capped_old_by_id[problem_id]["response_token_count"],
+            "old_generation_latency_ms": capped_old_by_id[problem_id]["generation_latency_ms"],
+            "model_repo": config["model"]["repo_id"],
+            "model_revision": config["model"]["model_revision"],
+            "tokenizer_revision": config["model"]["tokenizer_revision"],
+            "prompt_serialization_version": config["prompt"]["serialization_version"],
+            "generation_config": generation_config,
+            "generation_config_hash": generation_config_hash,
+            "raw_response": generated["response"],
+            "extracted_code": extracted.code,
+            "extraction_strategy": extracted.strategy,
+            "extraction_success": bool(extracted.code.strip()),
+            "verifier_status": verifier["status"],
+            "testcase_passed": verifier["passed"],
+            "testcase_total": verifier["total"],
+            "testcase_pass_rate": verifier["pass_rate"],
+            "reward_status": verifier["reward"]["status"],
+            "reward_passed": verifier["reward"]["passed"],
+            "reward_total": verifier["reward"]["total"],
+            "reward_pass_rate": verifier["reward"]["pass_rate"],
+            "heldout_status": verifier["heldout"]["status"],
+            "heldout_passed": verifier["heldout"]["passed"],
+            "heldout_total": verifier["heldout"]["total"],
+            "heldout_pass_rate": verifier["heldout"]["pass_rate"],
+            "prompt_token_count": generated["prompt_tokens"],
+            "response_token_count": generated["response_tokens"],
+            "generation_latency_ms": generated["generation_latency_ms"],
+            "hit_max_new_tokens": generated["hit_max_new_tokens"],
+        }
+        completed_by_id[problem_id] = rollout
+        with write_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(rollout, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+            handle.write("\n")
+        print(f"4096 diagnostic shard {shard_index}/{shard_count} evaluated {local_index}/{len(target_ids)}", flush=True)
+
+    if shard_count > 1:
+        shard_rollouts = load_jsonl(write_path) if write_path.exists() else []
+        report = {
+            "phase": "phase2_length_policy",
+            "step": "base_eval_2048_to_4096_cap_diagnostic_shard",
+            "status": "shard_completed",
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "git": {
+                "commit": git_command(["rev-parse", "HEAD"]),
+                "dirty": bool(git_status_short()),
+                "status_short": git_status_short(),
+            },
+            "config_file": config_path,
+            "config_hash": config_hash(config_path),
+            "shard_index": shard_index,
+            "shard_count": shard_count,
+            "target_count": len(target_ids),
+            "rollouts_path": str(write_path),
+            "rollouts_hash": file_sha256(write_path) if write_path.exists() else None,
+            "rollout_count": len(shard_rollouts),
+        }
+        write_json(
+            artifact_root(config)
+            / "reports"
+            / f"phase2_base_2048_to_4096_cap_diagnostic.shard_{shard_index:02d}_of_{shard_count:02d}.json",
+            report,
+        )
+        return report
+
+    new_rollouts = [completed_by_id.get(problem_id) for problem_id in capped_ids if problem_id in completed_by_id]
+    if len(new_rollouts) != len(capped_ids):
+        new_rollouts = load_jsonl(rollouts_path)
+    if len(new_rollouts) != len(capped_ids):
+        raise RuntimeError(f"Diagnostic incomplete: expected {len(capped_ids)} rollouts, got {len(new_rollouts)}")
+    write_jsonl(rollouts_path, new_rollouts)
+    return _write_final_report(
+        config_path=config_path,
+        config=config,
+        capped=capped,
+        capped_old_by_id=capped_old_by_id,
+        rollouts_path=rollouts_path,
+        new_rollouts=new_rollouts,
+    )
+
+
 def main() -> None:
     args = parse_args()
-    report = diagnose_base_cap_extension(args.config)
+    report = diagnose_base_cap_extension(
+        args.config,
+        shard_index=args.shard_index,
+        shard_count=args.shard_count,
+        combine_only=args.combine_only,
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
 
 
