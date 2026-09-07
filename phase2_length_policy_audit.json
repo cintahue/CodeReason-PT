@@ -1,0 +1,211 @@
+{
+  "base_2048_to_4096_diagnostic": {
+    "decision": "stop_no_auto_increase",
+    "diagnostic": {
+      "added_ac_count": 0,
+      "count": 101,
+      "generation_cost": {
+        "latency_sum_ratio_new_over_old": 1.3858244661030283,
+        "new_generation_latency_ms": {
+          "average": 124274.49504950496,
+          "count": 101.0,
+          "max": 160954.0,
+          "p50": 123261.0,
+          "p95": 135707.0,
+          "sum": 12551724
+        },
+        "new_response_tokens": {
+          "average": 4096.0,
+          "count": 101.0,
+          "max": 4096.0,
+          "p50": 4096.0,
+          "p95": 4096.0,
+          "sum": 413696
+        },
+        "old_generation_latency_ms": {
+          "average": 89675.49504950496,
+          "count": 101.0,
+          "max": 105409.0,
+          "p50": 89261.0,
+          "p95": 95692.0,
+          "sum": 9057225
+        },
+        "old_response_tokens": {
+          "average": 2048.0,
+          "count": 101.0,
+          "max": 2048.0,
+          "p50": 2048.0,
+          "p95": 2048.0,
+          "sum": 206848
+        },
+        "response_token_sum_ratio_new_over_old": 2.0
+      },
+      "max_new_tokens": 4096,
+      "new_ac_count": 1,
+      "old_ac_count": 1,
+      "remaining_cap_count": 101,
+      "remaining_cap_rate_full_dev": 0.23933649289099526,
+      "remaining_cap_rate_subset": 1.0,
+      "remaining_cap_threshold_count": 21,
+      "response_tokens": {
+        "count": 101.0,
+        "max": 4096.0,
+        "p50": 4096.0,
+        "p90": 4096.0,
+        "p95": 4096.0,
+        "p99": 4096.0
+      },
+      "rollouts_hash": "9ac75ed18019170d3a0a7c57a1f529e6ffeb1defc177861b9e60db35b0342a98",
+      "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/length_policy/base_dev_capped_2048_to_4096_rollouts.jsonl",
+      "status_counts": {
+        "AC": 1,
+        "CE": 55,
+        "RE": 11,
+        "WA": 34
+      },
+      "transition_matrix": {
+        "AC": {
+          "AC": 1
+        },
+        "CE": {
+          "CE": 44,
+          "RE": 5,
+          "WA": 12
+        },
+        "RE": {
+          "CE": 3,
+          "RE": 5,
+          "WA": 2
+        },
+        "WA": {
+          "CE": 8,
+          "RE": 1,
+          "WA": 20
+        }
+      }
+    },
+    "pilot": {
+      "capped_count": 101,
+      "config": "configs/base_eval.yaml",
+      "max_new_tokens": 2048,
+      "rollouts_hash": "385863576dca3bacfd79b6be68ff636bd1cc62de447832ad4042fe671ffcc6d2",
+      "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
+    },
+    "report_hash": "78266b4660e3334125b2102689885e41950a82671f134feb7362208df87741a3",
+    "report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_base_2048_to_4096_cap_diagnostic.json"
+  },
+  "config": {
+    "hash": "b4b9bef0943d328e2b179f1583eea188ffec0a0eb52c85a30322eee73453ba5f",
+    "path": "configs/base_eval_v2.yaml"
+  },
+  "final_decision": {
+    "eval_config_version": null,
+    "final_chosen_eval_max_new_tokens": null,
+    "final_chosen_sft_max_sequence_length": 8192,
+    "pilot_2048_marked_non_final": true,
+    "sft_length_policy": {
+      "eos_policy": "append_tokenizer_eos",
+      "max_sequence_length": 8192,
+      "reasoning_code_separator": "\n",
+      "serialization_version": "sft_code_preserving_reasoning_truncation_v1",
+      "truncation_policy": "keep_prompt_keep_code_left_truncate_reasoning_tokens"
+    }
+  },
+  "generated_at_utc": "2026-09-07T05:18:07.348709+00:00",
+  "git": {
+    "commit": "a37242e37bb99cd218d9e8c4bbeeb3e252006b8b",
+    "dirty": false,
+    "status_short": []
+  },
+  "official_4096_base_baseline": {
+    "completed": false,
+    "metrics": null,
+    "metrics_hash": null,
+    "metrics_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics_v2_4096.json",
+    "required": false,
+    "rollouts_hash": null,
+    "rollouts_path": null
+  },
+  "phase": "phase2_length_policy",
+  "phase1_final_eligibility_manifest_hash": "7b851acbb2d3989af88b0aeb6492100e2d4da12ecc16ce20a06cffde8ebdd98d",
+  "pilot_2048_baseline": {
+    "config": "configs/base_eval.yaml",
+    "metrics_hash": "a08aa6401fdb323456c90eed47bed85a138525123d4b68e4f48b0ec99e1be769",
+    "metrics_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics.json",
+    "role": "pilot_baseline",
+    "rollouts_hash": "385863576dca3bacfd79b6be68ff636bd1cc62de447832ad4042fe671ffcc6d2",
+    "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
+  },
+  "runtime": {
+    "gpu": [],
+    "package_versions": {
+      "accelerate": "1.14.0",
+      "datasets": "5.0.1",
+      "huggingface_hub": "1.30.0",
+      "pandas": "3.0.5",
+      "pyarrow": "25.0.1",
+      "tokenizers": "0.23.2",
+      "torch": "2.9.1+cu128",
+      "transformers": "5.16.1"
+    },
+    "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "time_utc": "2026-09-07T05:18:07Z"
+  },
+  "serialization_hashes": {
+    "combined_length_policy_hash": "34fb471f345187b5ee552bb79c479fb896386073116430e4b583e166ec023843",
+    "eval_generation_config_hash": "a539c70b378adc7578231ad50c06e590774b2533a0364b625863953cffcf448e",
+    "prompt_serialization_hash": "c9a94f64290c7d6e582e348ff67cd16049196e06d62bc38b2b83c2a07edbfb40",
+    "sft_sequence_serialization_hash": "279c5e33fbba941f78c43fd02da33a6ca304fe16482efd8147bfc315ac2449b8"
+  },
+  "sft_8192_code_preserving_diagnostic": {
+    "counts": {
+      "full_fit_8192": 1758,
+      "full_fit_8192_rate": 0.576204523107178,
+      "prompt_plus_full_code_plus_separator_eos_over_8192": 0,
+      "reasoning_truncated": 1293,
+      "reasoning_truncated_rate": 0.42379547689282204,
+      "total": 3051
+    },
+    "diagnostic_manifest": {
+      "count": 3051,
+      "hash": "1141698e2f3182e5ab53f8e149baaf894ccb9dfa81fa10cf7041290abf1fbc8b",
+      "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/length_policy/sft_8192_sequence_diagnostic.jsonl"
+    },
+    "final_sequence_token_max": 8192,
+    "final_sequence_tokens": {
+      "count": 3051.0,
+      "max": 8192.0,
+      "p50": 6838.0,
+      "p90": 8192.0,
+      "p95": 8192.0,
+      "p99": 8192.0
+    },
+    "original_reasoning_tokens": {
+      "count": 3051.0,
+      "max": 24263.0,
+      "p50": 6114.0,
+      "p90": 14306.0,
+      "p95": 15676.0,
+      "p99": 19572.0
+    },
+    "report_hash": "6bcfa1732304e241f9c12281fcc2fa2d8a2a01460cd6e51532c0b3263df44c32",
+    "report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_sft_8192_length_diagnostic.json",
+    "retained_original_reasoning_ratio": {
+      "count": 3051.0,
+      "max": 1.0,
+      "p5": 0.45711204161908386,
+      "p50": 1.0,
+      "p95": 1.0
+    },
+    "retained_reasoning_tokens": {
+      "count": 3051.0,
+      "max": 8072.0,
+      "p50": 6073.0,
+      "p90": 7518.0,
+      "p95": 7632.0,
+      "p99": 7815.0
+    },
+    "status": "completed"
+  },
+  "status": "stopped_no_auto_increase"
+}
