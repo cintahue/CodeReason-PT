@@ -47,18 +47,25 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
     sft_report = _read_json(sft_report_path)
     cap_report = _read_json(cap_report_path)
 
-    choose_4096 = cap_report.get("decision") == "choose_4096"
+    stop_before_8192 = cap_report.get("decision") in {"choose_4096", "stop_no_auto_increase"}
     official_complete = bool(
         official_report
         and official_report.get("mode") == "dev"
         and int(official_report.get("evaluated", -1)) == int(config["eval"]["expected_count"])
         and int(official_report.get("generation_config", {}).get("max_new_tokens", -1)) == 4096
     )
+    sft_counts = sft_report["counts"]
+    prompt_code_overflow_count = int(
+        sft_counts.get(
+            "prompt_plus_preserved_code_over_8192_count",
+            sft_counts.get("prompt_plus_full_code_plus_separator_eos_over_8192", -1),
+        )
+    )
     sft_policy_confirmed = bool(
         sft_report.get("status") == "completed"
-        and int(sft_report["counts"]["prompt_plus_full_code_plus_separator_eos_over_8192"]) == 0
+        and prompt_code_overflow_count == 0
     )
-    final_eval_max_new_tokens = 4096 if choose_4096 and official_complete else None
+    final_eval_max_new_tokens = 4096 if stop_before_8192 and official_complete else None
     final_sft_max_sequence_length = int(config["sft_sequence"]["max_sequence_length"]) if sft_policy_confirmed else None
 
     serialization = {
@@ -70,9 +77,9 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
         "generation_config": generation_config_for_hash(config),
     }
     if final_eval_max_new_tokens == 4096 and final_sft_max_sequence_length == 8192:
-        status = "completed_4096_official_baseline"
-    elif cap_report.get("decision") == "stop_no_auto_increase" and sft_policy_confirmed:
-        status = "stopped_no_auto_increase"
+        status = "completed_4096_policy_final_baseline"
+    elif stop_before_8192 and sft_policy_confirmed:
+        status = "awaiting_4096_policy_final_baseline"
     else:
         status = "incomplete"
     audit = {
@@ -99,9 +106,12 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
             "report_hash": file_sha256(sft_report_path),
             "status": sft_report["status"],
             "counts": sft_report["counts"],
+            "canonical_target_diagnostic": sft_report.get("canonical_target_diagnostic"),
             "original_reasoning_tokens": sft_report["original_reasoning_tokens"],
             "retained_reasoning_tokens": sft_report["retained_reasoning_tokens"],
-            "retained_original_reasoning_ratio": sft_report["retained_original_reasoning_ratio"],
+            "retained_reasoning_ratio": sft_report.get(
+                "retained_reasoning_ratio", sft_report.get("retained_original_reasoning_ratio")
+            ),
             "final_sequence_tokens": sft_report["final_sequence_tokens"],
             "final_sequence_token_max": sft_report["final_sequence_token_max"],
             "diagnostic_manifest": sft_report["diagnostic_manifest"],
@@ -114,7 +124,7 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
             "diagnostic": cap_report["diagnostic"],
         },
         "official_4096_base_baseline": {
-            "required": choose_4096,
+            "required": True,
             "completed": official_complete,
             "metrics_path": str(official_report_path),
             "metrics_hash": file_sha256(official_report_path) if official_report_path.exists() else None,
@@ -128,6 +138,7 @@ def finalize_length_policy(config_path: str) -> dict[str, Any]:
             "sft_length_policy": config["sft_sequence"],
             "eval_config_version": config["eval_config_version"] if final_eval_max_new_tokens == 4096 else None,
             "pilot_2048_marked_non_final": True,
+            "no_8192_eval_generation": cap_report.get("decision") == "stop_no_auto_increase",
         },
         "serialization_hashes": {
             "prompt_serialization_hash": stable_hash(

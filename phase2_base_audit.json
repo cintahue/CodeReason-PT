@@ -1,69 +1,100 @@
 {
   "base_metrics": {
     "code_extraction_success_rate": 1.0,
-    "executable_rate": 0.6066350710900474,
+    "executable_rate": 0.6184834123222749,
     "extraction_strategy_counts": {
       "direct": 222,
       "fenced:python": 197,
       "fenced:untyped": 3
     },
+    "generation_cap_hit_rate": 0.23933649289099526,
     "generation_latency_ms": {
-      "average": 26912.49526066351,
+      "average": 35193.29857819905,
       "count": 422.0,
-      "max": 105409.0,
+      "max": 160954.0,
       "p50": 6640.0,
-      "p95": 91084.0
+      "p95": 126210.0
     },
     "heldout_test_mean_pass_rate": 0.2219279328438529,
     "hit_max_new_tokens_count": 101,
     "mean_testcase_pass_rate": 0.21624100033428573,
     "pass_at_1": 0.08056872037914692,
     "response_tokens": {
-      "average": 614.2322274881517,
+      "average": 1104.39336492891,
       "count": 422.0,
-      "max": 2048.0,
+      "max": 4096.0,
       "p50": 154.0,
-      "p95": 2048.0
+      "p95": 4096.0
     },
     "reward_test_mean_pass_rate": 0.2139261955340013,
     "status_counts": {
       "AC": 34,
-      "CE": 71,
-      "RE": 79,
+      "CE": 65,
+      "RE": 80,
       "TLE": 16,
-      "WA": 222
+      "WA": 227
     },
     "total": 422
   },
+  "baseline_role": "official_base_baseline",
   "docker_image": "python@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534",
   "eval_config": {
     "generation_config": {
       "do_sample": false,
-      "max_new_tokens": 2048,
+      "max_new_tokens": 4096,
       "num_return_sequences": 1,
       "use_cache": true
     },
-    "generation_config_hash": "47131944c5d6e1978a371d3cf1b1c1ee395b3be101cde98c0230cad9d7e21cdc",
-    "hash": "92550817569c81a0373ab572f30d7ed38649775a8c212ff85408c7ea279cb456",
-    "path": "configs/base_eval.yaml",
+    "generation_config_hash": "a539c70b378adc7578231ad50c06e590774b2533a0364b625863953cffcf448e",
+    "hash": "1328b04cd1e4e898fed8cdf9130262ff0a8cf0f6613c58a5f0070879b2298eba",
+    "path": "configs/base_eval_v2.yaml",
     "prompt_serialization_version": "causal_lm_problem_solution_v1"
   },
+  "eval_config_version": "causal_lm_eval_v2",
   "final_dev_dataset_hash": "bacd4aa9ea0f0487c0b21ca0da5fc1ac1b1cea67cb53c363bbc8f2591084a0ce",
-  "generated_at_utc": "2026-09-06T15:18:27.638516+00:00",
+  "generated_at_utc": "2026-09-09T07:37:46.976198+00:00",
   "git": {
-    "commit": "b57beafc443487689c528334163d5e74170e6380",
-    "dirty": false,
-    "status_short": []
+    "commit": "ed44d4008c0a37062fdd37c2c2f19c7b1e443ebb",
+    "dirty": true,
+    "status_short": [
+      " M configs/base_eval_v2.yaml",
+      " M eval/diagnose_sft_length_policy.py",
+      " M eval/finalize_phase2_length_policy.py",
+      " M eval/run_base_baseline.py",
+      " M phase2_base_audit.json",
+      " M phase2_length_policy_audit.json",
+      "?? configs/sft.yaml",
+      "?? eval/finalize_base_4096_policy.py",
+      "?? eval/sft_sequence.py",
+      "?? scripts/12_phase2_finalize_base_4096_policy.sh",
+      "?? scripts/13_phase3_sft_smoke.sh",
+      "?? scripts/14_phase3_train_sft.sh",
+      "?? sft/",
+      "?? tests/test_sft_sequence.py"
+    ]
   },
   "metrics_report": {
-    "hash": "a08aa6401fdb323456c90eed47bed85a138525123d4b68e4f48b0ec99e1be769",
-    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics.json"
+    "hash": "d65ffad3e59a68d3792a2a14fec2a3225496bd38dedf649425e5a9e4d00ce48d",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics_v2_4096.json"
   },
   "model": {
     "dtype": "bfloat16",
     "model_revision": "09d9bc5d376b0cfa0100a0694ea7de7232525803",
+    "placement_policy": "single_visible_cuda_device_for_phase2_v2",
     "repo_id": "Qwen/Qwen2.5-Coder-3B",
     "tokenizer_revision": "09d9bc5d376b0cfa0100a0694ea7de7232525803"
+  },
+  "official_4096_combination_rule": {
+    "cap_diagnostic_decision": "stop_no_auto_increase",
+    "capped_4096_rollouts_hash": "9ac75ed18019170d3a0a7c57a1f529e6ffeb1defc177861b9e60db35b0342a98",
+    "capped_4096_rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/length_policy/base_dev_capped_2048_to_4096_rollouts.jsonl",
+    "no_8192_eval_generation": true,
+    "old_2048_baseline_role": "pilot_baseline",
+    "pilot_2048_rollouts_hash": "385863576dca3bacfd79b6be68ff636bd1cc62de447832ad4042fe671ffcc6d2",
+    "pilot_2048_rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl",
+    "policy": "reuse_natural_2048_terminations_and_replace_2048_capped_outputs_with_4096_reruns",
+    "rerun_capped_at_4096_count": 101,
+    "reused_natural_termination_count": 321
   },
   "phase": "phase2_base_baseline",
   "phase1_final_eligibility_manifest": "/mnt/data/liangjunwei/CodeReason-PT/phase1/manifests/phase1_final_eligibility_manifest.jsonl",
@@ -75,9 +106,17 @@
     "model_prompt_eval_config_frozen": true,
     "result_audit_hashes_recorded": true
   },
+  "pilot_baseline": {
+    "audit_commit": "b57beafc443487689c528334163d5e74170e6380",
+    "config": "configs/base_eval.yaml",
+    "eval_config_version": "causal_lm_eval_v1",
+    "max_new_tokens": 2048,
+    "metrics_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics.json",
+    "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
+  },
   "rollouts": {
-    "hash": "385863576dca3bacfd79b6be68ff636bd1cc62de447832ad4042fe671ffcc6d2",
-    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
+    "hash": "c6d862e0d1e3c1d202ada3948433d0169cf7a5a78035323975726669d7000a59",
+    "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts_v2_4096.jsonl"
   },
   "runtime": {
     "gpu": [
@@ -129,7 +168,7 @@
       "transformers": "5.16.1"
     },
     "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
-    "time_utc": "2026-09-06T14:55:05Z"
+    "time_utc": "2026-09-09T07:37:43Z"
   },
   "token_length_statistics": {
     "hash": "1a4f282536d3d7b2752840d457fbb89cf7127e88d568ac98717a6310d9b1cf3e",

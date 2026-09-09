@@ -84,11 +84,12 @@ pilot_baseline:
   audit_commit: b57beafc443487689c528334163d5e74170e6380
 
 sft_sequence:
-  serialization_version: sft_code_preserving_reasoning_truncation_v1
+  serialization_version: sft_canonical_r1_generation_code_preserving_truncation_v1
   max_sequence_length: 8192
-  reasoning_code_separator: "\n"
   eos_policy: append_tokenizer_eos
-  truncation_policy: keep_prompt_keep_code_left_truncate_reasoning_tokens
+  truncation_policy: keep_prompt_keep_final_code_left_truncate_reasoning_tokens
+  target: r1_generation
+  reference_code_role: locate_and_verify_only
 
 heldout_usage_boundary:
   task_integrity_qualification: source/reference solutions may run reward+heldout tests once for dataset integrity and verifier qualification

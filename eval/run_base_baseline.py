@@ -76,7 +76,7 @@ def _load_model_and_tokenizer(config: dict[str, Any]):
         model_source, model_kwargs = pretrained_load_reference(config, "model_revision")
         model = AutoModelForCausalLM.from_pretrained(
             model_source,
-            torch_dtype=_torch_dtype(str(model_config["dtype"])),
+            dtype=_torch_dtype(str(model_config["dtype"])),
             device_map=model_config.get("device_map", "auto"),
             **model_kwargs,
         )
@@ -277,6 +277,9 @@ def _summarize_rollouts(rollouts: list[dict[str, Any]]) -> dict[str, Any]:
         "reward_test_mean_pass_rate": sum(reward_pass_rates) / total if total else 0.0,
         "heldout_test_mean_pass_rate": sum(heldout_pass_rates) / total if total else 0.0,
         "hit_max_new_tokens_count": sum(1 for record in rollouts if record["hit_max_new_tokens"]),
+        "generation_cap_hit_rate": (
+            sum(1 for record in rollouts if record["hit_max_new_tokens"]) / total if total else 0.0
+        ),
     }
 
 

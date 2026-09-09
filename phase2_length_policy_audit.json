@@ -95,36 +95,89 @@
     "report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_base_2048_to_4096_cap_diagnostic.json"
   },
   "config": {
-    "hash": "b4b9bef0943d328e2b179f1583eea188ffec0a0eb52c85a30322eee73453ba5f",
+    "hash": "1328b04cd1e4e898fed8cdf9130262ff0a8cf0f6613c58a5f0070879b2298eba",
     "path": "configs/base_eval_v2.yaml"
   },
   "final_decision": {
-    "eval_config_version": null,
-    "final_chosen_eval_max_new_tokens": null,
+    "eval_config_version": "causal_lm_eval_v2",
+    "final_chosen_eval_max_new_tokens": 4096,
     "final_chosen_sft_max_sequence_length": 8192,
+    "no_8192_eval_generation": true,
     "pilot_2048_marked_non_final": true,
     "sft_length_policy": {
       "eos_policy": "append_tokenizer_eos",
       "max_sequence_length": 8192,
-      "reasoning_code_separator": "\n",
-      "serialization_version": "sft_code_preserving_reasoning_truncation_v1",
-      "truncation_policy": "keep_prompt_keep_code_left_truncate_reasoning_tokens"
+      "reference_code_role": "locate_and_verify_only",
+      "serialization_version": "sft_canonical_r1_generation_code_preserving_truncation_v1",
+      "target": "r1_generation",
+      "truncation_policy": "keep_prompt_keep_final_code_left_truncate_reasoning_tokens"
     }
   },
-  "generated_at_utc": "2026-09-07T05:18:07.348709+00:00",
+  "generated_at_utc": "2026-09-09T07:39:25.999219+00:00",
   "git": {
-    "commit": "a37242e37bb99cd218d9e8c4bbeeb3e252006b8b",
-    "dirty": false,
-    "status_short": []
+    "commit": "ed44d4008c0a37062fdd37c2c2f19c7b1e443ebb",
+    "dirty": true,
+    "status_short": [
+      " M configs/base_eval_v2.yaml",
+      " M eval/diagnose_sft_length_policy.py",
+      " M eval/finalize_phase2_length_policy.py",
+      " M eval/run_base_baseline.py",
+      " M phase2_base_audit.json",
+      " M phase2_length_policy_audit.json",
+      "?? configs/sft.yaml",
+      "?? eval/finalize_base_4096_policy.py",
+      "?? eval/sft_sequence.py",
+      "?? scripts/12_phase2_finalize_base_4096_policy.sh",
+      "?? scripts/13_phase3_sft_smoke.sh",
+      "?? scripts/14_phase3_train_sft.sh",
+      "?? sft/",
+      "?? tests/test_sft_sequence.py"
+    ]
   },
   "official_4096_base_baseline": {
-    "completed": false,
-    "metrics": null,
-    "metrics_hash": null,
+    "completed": true,
+    "metrics": {
+      "code_extraction_success_rate": 1.0,
+      "executable_rate": 0.6184834123222749,
+      "extraction_strategy_counts": {
+        "direct": 222,
+        "fenced:python": 197,
+        "fenced:untyped": 3
+      },
+      "generation_cap_hit_rate": 0.23933649289099526,
+      "generation_latency_ms": {
+        "average": 35193.29857819905,
+        "count": 422.0,
+        "max": 160954.0,
+        "p50": 6640.0,
+        "p95": 126210.0
+      },
+      "heldout_test_mean_pass_rate": 0.2219279328438529,
+      "hit_max_new_tokens_count": 101,
+      "mean_testcase_pass_rate": 0.21624100033428573,
+      "pass_at_1": 0.08056872037914692,
+      "response_tokens": {
+        "average": 1104.39336492891,
+        "count": 422.0,
+        "max": 4096.0,
+        "p50": 154.0,
+        "p95": 4096.0
+      },
+      "reward_test_mean_pass_rate": 0.2139261955340013,
+      "status_counts": {
+        "AC": 34,
+        "CE": 65,
+        "RE": 80,
+        "TLE": 16,
+        "WA": 227
+      },
+      "total": 422
+    },
+    "metrics_hash": "d65ffad3e59a68d3792a2a14fec2a3225496bd38dedf649425e5a9e4d00ce48d",
     "metrics_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/base_dev_metrics_v2_4096.json",
-    "required": false,
-    "rollouts_hash": null,
-    "rollouts_path": null
+    "required": true,
+    "rollouts_hash": "c6d862e0d1e3c1d202ada3948433d0169cf7a5a78035323975726669d7000a59",
+    "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts_v2_4096.jsonl"
   },
   "phase": "phase2_length_policy",
   "phase1_final_eligibility_manifest_hash": "7b851acbb2d3989af88b0aeb6492100e2d4da12ecc16ce20a06cffde8ebdd98d",
@@ -137,7 +190,44 @@
     "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/rollouts/base_dev_rollouts.jsonl"
   },
   "runtime": {
-    "gpu": [],
+    "gpu": [
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 1,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 2,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      },
+      {
+        "capability": [
+          8,
+          6
+        ],
+        "index": 3,
+        "name": "NVIDIA GeForce RTX 3090",
+        "total_vram_mb": 24124
+      }
+    ],
     "package_versions": {
       "accelerate": "1.14.0",
       "datasets": "5.0.1",
@@ -149,63 +239,95 @@
       "transformers": "5.16.1"
     },
     "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
-    "time_utc": "2026-09-07T05:18:07Z"
+    "time_utc": "2026-09-09T07:39:26Z"
   },
   "serialization_hashes": {
-    "combined_length_policy_hash": "34fb471f345187b5ee552bb79c479fb896386073116430e4b583e166ec023843",
+    "combined_length_policy_hash": "1457194b3559957090491e96f6a7d89b6fac9d9a62b93d6f3175c0f327e8d20e",
     "eval_generation_config_hash": "a539c70b378adc7578231ad50c06e590774b2533a0364b625863953cffcf448e",
     "prompt_serialization_hash": "c9a94f64290c7d6e582e348ff67cd16049196e06d62bc38b2b83c2a07edbfb40",
-    "sft_sequence_serialization_hash": "279c5e33fbba941f78c43fd02da33a6ca304fe16482efd8147bfc315ac2449b8"
+    "sft_sequence_serialization_hash": "73c4fd058e63973134af220f300b85781342114afdfe977929ea2794f53e3f05"
   },
   "sft_8192_code_preserving_diagnostic": {
+    "canonical_target_diagnostic": {
+      "code_start_character_ratio": {
+        "count": 3051.0,
+        "max": 0.9984126188447207,
+        "p5": 0.908745247148289,
+        "p50": 0.9651346715084546,
+        "p95": 0.9900293255131964,
+        "p99": 0.9955767124441823
+      },
+      "code_start_token_ratio": {
+        "count": 3051.0,
+        "max": 0.9978203331776428,
+        "p5": 0.9061672342035566,
+        "p50": 0.9647994386621448,
+        "p95": 0.9888996138996139,
+        "p99": 0.994343772912957
+      },
+      "exact_substring_count": 3051,
+      "exact_substring_rate": 1.0,
+      "normalized_substring_count": 3051,
+      "normalized_substring_rate": 1.0,
+      "response_contains_final_code_count": 3051,
+      "response_contains_final_code_rate": 1.0,
+      "total": 3051,
+      "unlocatable_example_count": 0,
+      "unlocatable_examples_no_raw_text": [],
+      "unlocatable_final_code_count": 0
+    },
     "counts": {
-      "full_fit_8192": 1758,
-      "full_fit_8192_rate": 0.576204523107178,
+      "dropped_code_overflow_count": 0,
+      "dropped_unlocatable_count": 0,
+      "final_usable_sft_count": 3051,
+      "full_fit_count": 1797,
+      "full_fit_rate": 0.5889872173058014,
       "prompt_plus_full_code_plus_separator_eos_over_8192": 0,
-      "reasoning_truncated": 1293,
-      "reasoning_truncated_rate": 0.42379547689282204,
+      "prompt_plus_preserved_code_over_8192_count": 0,
+      "reasoning_truncated_count": 1254,
+      "reasoning_truncated_rate": 0.4110127826941986,
       "total": 3051
     },
     "diagnostic_manifest": {
       "count": 3051,
-      "hash": "1141698e2f3182e5ab53f8e149baaf894ccb9dfa81fa10cf7041290abf1fbc8b",
+      "hash": "0fa3eb1e75a071f2451b0982f7dc997a58c29a448515b3f95dd89f0e8f73d19c",
       "path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/length_policy/sft_8192_sequence_diagnostic.jsonl"
     },
     "final_sequence_token_max": 8192,
     "final_sequence_tokens": {
       "count": 3051.0,
       "max": 8192.0,
-      "p50": 6838.0,
+      "p50": 6640.0,
       "p90": 8192.0,
       "p95": 8192.0,
       "p99": 8192.0
     },
     "original_reasoning_tokens": {
       "count": 3051.0,
-      "max": 24263.0,
-      "p50": 6114.0,
-      "p90": 14306.0,
-      "p95": 15676.0,
-      "p99": 19572.0
+      "max": 23659.0,
+      "p50": 5892.0,
+      "p90": 13879.0,
+      "p95": 15178.0,
+      "p99": 18943.0
     },
-    "report_hash": "6bcfa1732304e241f9c12281fcc2fa2d8a2a01460cd6e51532c0b3263df44c32",
+    "report_hash": "3aa7c12752bb72b5acbf77698b70bdca5666d61b3231594e8cab22d339dcd223",
     "report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase2/reports/phase2_sft_8192_length_diagnostic.json",
-    "retained_original_reasoning_ratio": {
+    "retained_reasoning_ratio": {
       "count": 3051.0,
       "max": 1.0,
-      "p5": 0.45711204161908386,
+      "p5": 0.469811687051058,
       "p50": 1.0,
       "p95": 1.0
     },
     "retained_reasoning_tokens": {
       "count": 3051.0,
       "max": 8072.0,
-      "p50": 6073.0,
-      "p90": 7518.0,
-      "p95": 7632.0,
-      "p99": 7815.0
+      "p50": 5860.0,
+      "p90": 7499.0,
+      "p95": 7615.0,
+      "p99": 7803.0
     },
     "status": "completed"
   },
-  "status": "stopped_no_auto_increase"
+  "status": "completed_4096_policy_final_baseline"
 }

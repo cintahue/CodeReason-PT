@@ -1,0 +1,69 @@
+phase: phase3_reasoning_sft
+frozen: false
+
+paths:
+  artifact_root: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft
+  sft_view_path: /mnt/data/liangjunwei/CodeReason-PT/phase2/views/final_sft.jsonl
+  phase2_length_policy_audit_path: /home/liangjunwei/CodeReason-PT/phase2_length_policy_audit.json
+  base_eval_config_path: /home/liangjunwei/CodeReason-PT/configs/base_eval_v2.yaml
+
+expected:
+  source_sft_count: 3051
+  max_sequence_length: 8192
+  eval_max_new_tokens: 4096
+
+model:
+  repo_id: Qwen/Qwen2.5-Coder-3B
+  model_revision: 09d9bc5d376b0cfa0100a0694ea7de7232525803
+  tokenizer_revision: 09d9bc5d376b0cfa0100a0694ea7de7232525803
+  cache_dir: /mnt/data/liangjunwei/CodeReason-PT/hf_cache
+  local_dir: /mnt/data/liangjunwei/CodeReason-PT/models/Qwen2.5-Coder-3B/09d9bc5d376b0cfa0100a0694ea7de7232525803
+  dtype: bfloat16
+  trust_remote_code: false
+  device_map: auto
+
+prompt:
+  serialization_version: causal_lm_problem_solution_v1
+  use_chat_template: false
+  template: "### Problem\n{problem}\n\n### Solution\n"
+
+sft_sequence:
+  serialization_version: sft_canonical_r1_generation_code_preserving_truncation_v1
+  max_sequence_length: 8192
+  eos_policy: append_tokenizer_eos
+  truncation_policy: keep_prompt_keep_final_code_left_truncate_reasoning_tokens
+  target: r1_generation
+  reference_code_role: locate_and_verify_only
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  seed: 20260909
+  output_dir: /mnt/data/liangjunwei/CodeReason-PT/checkpoints/sft_qwen2_5_coder_3b_lora_r16
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  num_train_epochs: 1
+  learning_rate: 0.0001
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  logging_steps: 10
+  save_strategy: epoch
+  bf16: true
+  gradient_checkpointing: true
+  optim: adamw_torch
+  report_to: none
+
+smoke:
+  sample_count: 16
+  max_steps: 5
+  output_dir: /mnt/data/liangjunwei/CodeReason-PT/checkpoints/sft_smoke_qwen2_5_coder_3b_lora_r16
+
+outputs:
+  smoke_rollouts: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft/eval/sft_smoke_rollouts.jsonl
+  smoke_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft/eval/sft_smoke_report.json
+  dev_rollouts: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft/eval/sft_dev_rollouts.jsonl
+  dev_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft/eval/sft_dev_report.json
