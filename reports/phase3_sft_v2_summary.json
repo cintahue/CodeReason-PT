@@ -1,0 +1,69 @@
+{
+  "phase": "phase3_reasoning_sft_v2",
+  "status": "completed_failed_gate",
+  "policy": {
+    "max_sequence_length": 8192,
+    "max_response_tokens_including_eos": 4096,
+    "eval_max_new_tokens": 4096
+  },
+  "construction": {
+    "source_records": 3051,
+    "usable_records": 2918,
+    "dropped_records": 133,
+    "drop_reason_counts": {
+      "unclosed_or_late_think": 133
+    },
+    "full_fit_count": 944,
+    "reasoning_truncated_count": 1974,
+    "mandatory_suffix_over_budget_count": 0,
+    "integrity_failure_record_count": 0,
+    "eos_supervised_count": 2918,
+    "dataset_hash": "bafca806eb9c5865f6afafdae39cccd973b67881e13df626ce8f08b345cfe102",
+    "audit_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v2/construction/sft_v2_construction_audit.json",
+    "audit_hash": "86637ba18f918405d497d4c74989b135554af0edd5f0d54e4110bd37e0634b8d"
+  },
+  "training": {
+    "status": "completed",
+    "train_loss": 0.8540546155955694,
+    "checkpoint_path": "/mnt/data/liangjunwei/CodeReason-PT/checkpoints/sft_qwen2_5_coder_3b_lora_r16_v2",
+    "train_report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v2/train/sft_v2_train_report.json",
+    "train_report_hash": "955bdc5f256e307d42aca0e0b1b88fd7a470762f44f413c5f975b07b935cc9b2",
+    "checkpoint_load_report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v2/train/checkpoint_load_report.json",
+    "checkpoint_load_report_hash": "e3c74db3a3a84ae116ffbc8088bff6e7e21b139e7de2f108ac99f91d46bd82b6"
+  },
+  "dev_evaluation": {
+    "status": "completed",
+    "evaluated": 422,
+    "pass_at_1": 0.04028436018957346,
+    "executable_rate": 0.0995260663507109,
+    "mean_testcase_pass_rate": 0.05989667812529851,
+    "reward_test_mean_pass_rate": 0.05996873907299684,
+    "heldout_test_mean_pass_rate": 0.05980313897978872,
+    "G_V": 0.0001656000932081167,
+    "generation_cap_hit_rate": 0.8933649289099526,
+    "format_valid_rate": 0.1066350710900474,
+    "unclosed_think_rate": 0.8933649289099526,
+    "status_counts": {
+      "AC": 17,
+      "WA": 25,
+      "CE": 377,
+      "RE": 3,
+      "TLE": 0
+    },
+    "report_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v2/eval/sft_dev_report.json",
+    "report_hash": "5ea3cc75596d3394efb08bfb6bfeb5858005ae58684868836c97a109ea7799bb",
+    "rollouts_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v2/eval/sft_dev_rollouts.jsonl",
+    "rollouts_hash": "66d9319cb8962b77dbcb6d636669ae36303a24b4179615031059ae223f952076"
+  },
+  "gate": {
+    "construction_gate": "passed",
+    "behavioral_gate": "failed",
+    "dpo_grpo_ready": false,
+    "reason": "89.34% cap-hit and unclosed-think responses; format-valid rate 10.66%; executable rate 9.95%."
+  },
+  "provenance": {
+    "v1_artifacts_preserved": true,
+    "checkpoint_and_full_rollouts_kept_under_mnt_data": true,
+    "smoke_report_found": false
+  }
+}
