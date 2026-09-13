@@ -1,0 +1,91 @@
+{
+  "phase": "phase3_reasoning_sft_v3",
+  "status": "construction_gate_passed",
+  "hypothesis": "natural_length_complete_r1_trajectories",
+  "policy": {
+    "max_sequence_length": 8192,
+    "max_response_tokens_including_eos": 4096,
+    "frozen_eval_max_new_tokens": 4096,
+    "truncation": false,
+    "reconstruction": false,
+    "reference_code_appended": false,
+    "target": "original_r1_generation_once"
+  },
+  "diagnostic": {
+    "source_records": 3051,
+    "response_including_eos_thresholds": {
+      "1024": {"count": 189, "rate": 0.061946902654867256},
+      "2048": {"count": 506, "rate": 0.16584726319239593},
+      "3072": {"count": 773, "rate": 0.25335955424451},
+      "4096": {"count": 1040, "rate": 0.34087184529662407}
+    },
+    "code_start_thresholds": {
+      "1024": {"count": 223, "rate": 0.0730907899049492},
+      "2048": {"count": 542, "rate": 0.17764667322189445},
+      "3072": {"count": 817, "rate": 0.26778105539167485},
+      "4096": {"count": 1082, "rate": 0.35463782366437235}
+    },
+    "joint_candidates": {
+      "response_le_4096_code_start_le_3072": 726,
+      "response_le_4096_code_start_le_2048": 469,
+      "response_le_3072_code_start_le_2048": 469
+    },
+    "response_percentiles": {"p50": 6115, "p90": 14307, "p95": 15677, "p99": 19573},
+    "code_start_percentiles": {"p50": 5892, "p90": 13879, "p95": 15178, "p99": 18943},
+    "code_length_percentiles": {"p50": 175, "p90": 500, "p95": 623, "p99": 916, "max": 1398},
+    "exact_code_location_count": 3051,
+    "normalized_only_location_count": 0,
+    "unlocatable_count": 0,
+    "structure_gate_pass_count": 2918,
+    "total_sequence_budget_ok_count": 1797
+  },
+  "selected_candidate": {
+    "name": "clean_joint_response_le_4096_code_start_le_3072",
+    "count": 726,
+    "rate": 0.23795476892822026,
+    "rule": "structure_gate and response_including_eos<=4096 and code_start_token<=3072 and total_sequence<=8192",
+    "source_counts": {"apps": 422, "taco": 304},
+    "source_split_counts": {
+      "apps/test": 414,
+      "apps/train": 8,
+      "taco/test": 7,
+      "taco/train": 297
+    },
+    "difficulty_counts": {
+      "EASY": 111,
+      "HARD": 1,
+      "MEDIUM": 16,
+      "MEDIUM_HARD": 12,
+      "UNKNOWN_DIFFICULTY": 164,
+      "VERY_HARD": 0,
+      "competition": 16,
+      "interview": 223,
+      "introductory": 183
+    },
+    "distribution_shift_present": true
+  },
+  "construction_integrity": {
+    "constructed_records": 726,
+    "artificial_truncation_count": 0,
+    "reference_code_appended_count": 0,
+    "eos_supervised_count": 726,
+    "max_response_tokens_including_eos": 3362,
+    "max_sequence_tokens": 4160
+  },
+  "provenance": {
+    "config_path": "configs/sft_v3.yaml",
+    "config_hash": "8921d3ecd264aca91333e921ac24e7b72f8d0ae032ed46cab5d49f57324c0dbd",
+    "audit_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v3/construction/sft_v3_candidate_audit.json",
+    "audit_hash": "b322a597ee05872c6149e8b6ef6c3bf9b15248e2fbf3b6095bac5920a5cb9813",
+    "manifest_path": "/mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v3/construction/sft_v3_candidate_manifest.jsonl",
+    "manifest_hash": "f752de76cfcb0ac6f24b082965fcb41762e7d8b8e772bebd70d8bf825dd58a4a",
+    "dataset_hash": "836b2569df27b6bb36cb8aa68e69335a5a6c9ffbf3ab959b2965bf3be045eb67",
+    "v1_v2_artifacts_touched": false
+  },
+  "gate": {
+    "diagnostic_complete": true,
+    "formal_training_allowed": true,
+    "default_candidate_requires_manual_review": true,
+    "dpo_grpo_ready": false
+  }
+}
