@@ -1,0 +1,26 @@
+{
+  "phase": "phase3_reasoning_sft_v4",
+  "status": "construction_frozen",
+  "training_subset": "natural_length_filtered",
+  "candidate_count": 726,
+  "dataset_hash": "836b2569df27b6bb36cb8aa68e69335a5a6c9ffbf3ab959b2965bf3be045eb67",
+  "candidate_ids_hash": "4d38040f3bee466d542625b261ec1c5b16ff25d0a29340ea864cc7147660a868",
+  "manifest_hash": "f752de76cfcb0ac6f24b082965fcb41762e7d8b8e772bebd70d8bf825dd58a4a",
+  "v3_config_hash": "8921d3ecd264aca91333e921ac24e7b72f8d0ae032ed46cab5d49f57324c0dbd",
+  "v3_commit_sha": "c237dba03d16e0473ff63a0f582b618d5de92dff",
+  "controlled_change": {
+    "v3_learning_rate": 0.0001,
+    "v4_learning_rate": 0.00005,
+    "only_experimental_change": true
+  },
+  "invariants": {
+    "same_candidate_problem_ids": true,
+    "same_original_untruncated_r1_generation": true,
+    "same_model_tokenizer_prompt": true,
+    "same_lora_optimizer_schedule_epoch_batch": true,
+    "same_frozen_4096_evaluation": true,
+    "artificial_truncation": false,
+    "eos_supervised": true,
+    "v1_v2_v3_artifacts_overwritten": false
+  }
+}
