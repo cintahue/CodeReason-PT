@@ -149,6 +149,10 @@ def _training_args(config: dict[str, Any], mode: str):
     }
     if mode == "smoke":
         kwargs.update(max_steps=int(config["smoke"]["max_steps"]), save_strategy="steps", save_steps=int(config["smoke"]["max_steps"]))
+        # Five smoke steps are shorter than the formal logging interval. Keep
+        # the formal v3 interval unchanged, but log every smoke step so the
+        # smoke gate can inspect finite loss and gradient norms.
+        kwargs["logging_steps"] = 1
     else:
         kwargs["num_train_epochs"] = float(training["num_train_epochs"])
     return TrainingArguments(**kwargs)
@@ -233,6 +237,12 @@ def train_sft_v4(config_path: str, mode: str) -> dict[str, Any]:
         data_collator=DataCollatorForResponseOnlySftV4(int(tokenizer.pad_token_id)),
     )
     train_result = trainer.train()
+    training_diagnostics = _training_diagnostics(trainer, examples, train_result, args)
+    final_train_loss = training_diagnostics["final_train_loss"]
+    if not math.isfinite(final_train_loss):
+        raise ValueError("v4 training loss is non-finite")
+    if mode == "smoke" and not training_diagnostics["grad_norm_distribution"].get("count"):
+        raise ValueError("v4 smoke did not record any gradient norm")
     trainer.save_model(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
     load_check = _validate_saved_adapter(Path(args.output_dir), trainer.model)
@@ -267,7 +277,7 @@ def train_sft_v4(config_path: str, mode: str) -> dict[str, Any]:
         "dataset_stats": dataset_stats,
         "manifest": {"path": str(manifest_path), "hash": file_sha256(manifest_path), "count": len(manifest)},
         "label_invariant_audit": {"prompt_fully_masked_count": prompt_masked, "prompt_fully_masked_rate": prompt_masked / len(examples), "eos_supervised_count": eos_supervised, "eos_supervised_rate": eos_supervised / len(examples), "padding_policy": "collator masks all padding labels with -100"},
-        "training_diagnostics": _training_diagnostics(trainer, examples, train_result, args),
+        "training_diagnostics": training_diagnostics,
         "provenance": {"code_commit_sha": git_command(["rev-parse", "HEAD"]), "working_tree_clean_at_train": not bool(git_status_short()), "v3_commit_sha": freeze["v3_commit_sha"]},
         "checkpoint": {"path": str(args.output_dir), **load_check},
         "train_metrics": train_result.metrics,

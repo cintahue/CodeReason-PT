@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 
 from data.config import load_config
+from eval.sft_v3_sequence import shifted_loss_positions
+from sft.train_v4 import DataCollatorForResponseOnlySftV4
 from sft.v4_data import controlled_config_diff
 
 
@@ -68,6 +70,28 @@ class SftV4ControlTest(unittest.TestCase):
         )
         self.assertEqual(float(config["training"]["learning_rate"]), 0.00005)
         self.assertEqual(int(config["training"]["num_train_epochs"]), 1)
+
+    def test_eos_is_the_final_shifted_response_target(self) -> None:
+        import torch
+
+        eos = 3
+        collator = DataCollatorForResponseOnlySftV4(pad_token_id=0)
+        batch = collator(
+            [
+                {"input_ids": [10, 11, 12, eos], "labels": [-100, -100, 12, eos]},
+                {"input_ids": [20, 21, eos], "labels": [-100, -100, eos]},
+            ]
+        )
+
+        first_input = batch["input_ids"][0].tolist()
+        first_labels = batch["labels"][0].tolist()
+        second_labels = batch["labels"][1].tolist()
+        self.assertEqual(first_input[-1], eos)
+        self.assertEqual(first_labels[-1], eos)
+        self.assertIn(len(first_labels) - 1, shifted_loss_positions(first_labels))
+        self.assertEqual(first_labels[:2], [-100, -100])
+        self.assertEqual(second_labels[-1], -100)  # right-padding is never supervised
+        self.assertTrue(torch.is_tensor(batch["labels"]))
 
 
 if __name__ == "__main__":

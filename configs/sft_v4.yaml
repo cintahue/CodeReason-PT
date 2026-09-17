@@ -79,10 +79,10 @@ training:
 smoke:
   sample_count: 16
   max_steps: 5
-  output_dir: /mnt/data/liangjunwei/CodeReason-PT/checkpoints/sft_smoke_qwen2_5_coder_3b_lora_r16_v4
+  output_dir: /mnt/data/liangjunwei/CodeReason-PT/checkpoints/sft_smoke_qwen2_5_coder_r16_v4_smoke_diag2
 
 outputs:
-  smoke_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v4/smoke/sft_v4_smoke_report.json
+  smoke_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v4/smoke/sft_v4_smoke_diag2_report.json
   train_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v4/train/sft_v4_train_report.json
   dev_rollouts: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v4/eval/sft_dev_rollouts.jsonl
   dev_report: /mnt/data/liangjunwei/CodeReason-PT/phase3_sft_v4/eval/sft_dev_report.json
