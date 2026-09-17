@@ -181,6 +181,8 @@ def evaluate_sft_v4(config_path: str, base_config_path: str | None, mode: str) -
         "phase": "phase3_reasoning_sft_v4", "step": "sft_v4_dev_evaluation", "mode": mode, "status": "completed", "generated_at_utc": datetime.now(timezone.utc).isoformat(), "split": split, "evaluated": len(rollouts), "model_role": "sft_v4", "training_subset": "natural_length_filtered", "learning_rate": float(sft_config["training"]["learning_rate"]),
         "base_model": {"repo_id": base_config["model"]["repo_id"], "model_revision": base_config["model"]["model_revision"], "tokenizer_revision": base_config["model"]["tokenizer_revision"]},
         "sft_checkpoint": {"path": str(checkpoint), "adapter_hash": checkpoint_hash, "train_report_path": str(train_report_path), "train_report_hash": file_sha256(train_report_path)},
+        "training_hyperparameter_change": train_report["training_hyperparameter_change"],
+        "training_diagnostics": train_report["training_diagnostics"],
         "candidate_dataset": {"count": freeze["candidate_count"], "dataset_hash": freeze["dataset_hash"], "candidate_ids_hash": freeze["candidate_ids_hash"], "manifest_hash": freeze["manifest_hash"], "distribution_shift_present": True},
         "dataset_distribution": freeze["dataset_distribution"],
         "prompt": {"serialization_version": base_config["prompt"]["serialization_version"], "template": base_config["prompt"]["template"], "use_chat_template": base_config["prompt"]["use_chat_template"]},
